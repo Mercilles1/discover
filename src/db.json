@@ -1,0 +1,160 @@
+{
+	"users": [
+		{
+			"id": "1",
+			"fullname": "Abduvohid Xoshimov",
+			"gmail": "abcdefgmananam@gmail.com",
+			"password": "20100429",
+			"favoriteItems": [],
+			"orders": [],
+			"historyOfOrders": [],
+			"creditCard": "",
+			"locations": [],
+			"notifications": []
+		}
+	],
+	"products": [
+		{
+			"id": "1",
+			"img": "/src/assets/product1.png",
+			"title": "Regular Fit Slogan",
+			"price": "1190",
+			"rating": "",
+      "categories": "T-shirt",
+			"about": "The name says it all, the right size slightly snugs the body leaving enough room for comfort in the sleeves and waist.",
+			"reviews": [
+				{
+					"id": "1",
+					"rating": "5/5",
+					"comment": "The item is very good, my son likes it very much and plays every day.",
+					"userName": "Wade Warren",
+					"date": "10.04.2025"
+				}
+			],
+			"sizes": [
+				{
+					"id": "1",
+					"size": "L",
+					"count": "35"
+				},
+				{
+					"id": "2",
+					"size": "S",
+					"count": "25"
+				},
+        {
+					"id": "3",
+					"size": "M",
+					"count": "30"
+				}
+			]
+		},{
+			"id": "2",
+			"img": "/src/assets/product2.png",
+			"title": "Regular Fit Polo",
+			"price": "1290",
+			"rating": "",
+			"categories": "T-shirt",
+			"about": "The name says it all, the right size slightly snugs the body leaving enough room for comfort in the sleeves and waist.",
+			"reviews": [
+				{
+					"id": "1",
+					"rating": "5/5",
+					"comment": "The item is very good, my son likes it very much and plays every day.",
+					"userName": "Wade Warren",
+					"date": "10.04.2025"
+				}
+			],
+			"sizes": [
+				{
+					"id": "1",
+					"size": "L",
+					"count": "35"
+				},
+				{
+					"id": "2",
+					"size": "S",
+					"count": "25"
+				},
+				{
+					"id": "3",
+					"size": "M",
+					"count": "30"
+				}
+			]
+		},{
+			"id": "3",
+			"img": "/src/assets/product3.png",
+			"title": "Regular Fit Black",
+			"price": "1090",
+			"rating": "",
+			"categories": "T-shirt",
+			"about": "The name says it all, the right size slightly snugs the body leaving enough room for comfort in the sleeves and waist.",
+			"reviews": [
+				{
+					"id": "1",
+					"rating": "5/5",
+					"comment": "The item is very good, my son likes it very much and plays every day.",
+					"userName": "Wade Warren",
+					"date": "10.04.2025"
+				}
+			],
+			"sizes": [
+				{
+					"id": "1",
+					"size": "L",
+					"count": "35"
+				},
+				{
+					"id": "2",
+					"size": "S",
+					"count": "25"
+				},
+				{
+					"id": "3",
+					"size": "M",
+					"count": "30"
+				}
+			]
+		}, 
+    {
+			"id": "4",
+			"img": "/src/assets/product4.png",
+			"title": "Regular Fit Regular",
+			"price": "1590",
+			"rating": "",
+			"categories": "T-shirt",
+			"about": "The name says it all, the right size slightly snugs the body leaving enough room for comfort in the sleeves and waist.",
+			"reviews": [
+				{
+					"id": "1",
+					"rating": "5/5",
+					"comment": "The item is very good, my son likes it very much and plays every day.",
+					"userName": "Wade Warren",
+					"date": "10.04.2025"
+				}
+			],
+			"sizes": [
+				{
+					"id": "1",
+					"size": "L",
+					"count": "35"
+				},
+				{
+					"id": "2",
+					"size": "S",
+					"count": "25"
+				},
+				{
+					"id": "3",
+					"size": "M",
+					"count": "30"
+				}
+			]
+		}
+	],
+	"notifications": [
+
+
+  ]
+}
