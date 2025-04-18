@@ -62,7 +62,7 @@ export default function Cart() {
 
     return (
         <div className="flex flex-col h-screen bg-white w-[390px] mx-auto">
-            <div className="px-4 py-4 border-b text-center text-lg font-semibold flex items-center justify-between">
+            <div className="px-4 py-4 border-b text-center text-lg font-semibold flex items-center justify-between gap-[16px]">
                 <img onClick={() => navigate("/")} src={arrow} alt="" />
                 <p>My cart</p>
                 <img onClick={() => navigate("/notes")} src={bell} alt="" />
@@ -72,7 +72,7 @@ export default function Cart() {
                 {cartProducts.length === 0 ? (
                     <div className="flex flex-col items-center mt-[228px] ml-[61px]">
                         <img src={korzin} alt="" />
-                        <p className='text-[#1A1A1A] text-[20px] font-600'>Your Cart Is Empty!</p>
+                        <p className='text-[#1A1A1A] text-[20px] font-[600]'>Your Cart Is Empty!</p>
                         <p className='text-center text-[16px] font-[400] text-[#808080] w-[248px]'>When you add products, they’ll appear here.</p>
                     </div>
                 ) : (
