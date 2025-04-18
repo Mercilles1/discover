@@ -15,6 +15,7 @@ function App() {
           <Route path="/saved" element={<div className='w-[390px] px-[24px] pt-[12px]'><h1 className='text-2xl font-bold'>Saved Items</h1></div>} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/account" element={<div className='w-[390px] px-[24px] pt-[12px]'><h1 className='text-2xl font-bold'>Account Page</h1></div>} />
+          <Route path="/notes" element={<div className='w-[390px] px-[24px] pt-[12px]'><h1 className='text-2xl font-bold'>Notifications</h1></div>} />
         </Routes>
       </div>
     </Router>
