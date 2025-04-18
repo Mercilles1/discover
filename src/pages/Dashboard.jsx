@@ -19,7 +19,7 @@ function Dashboard() {
 	useEffect(() => {
 		const fetchProducts = async () => {
 			try {
-				const response = await fetch('http://localhost:5000/products')
+				const response = await fetch('https://marsgoup-1.onrender.com/api/products')
 				if (!response.ok) {
 					throw new Error('Network response was not ok')
 				}
