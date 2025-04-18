@@ -1,7 +1,8 @@
 import { Navigate } from 'react-router-dom'
+import Dashboard from '../pages/Dashboard'
 
-const PrivateRoute = ({ isAuth, children }) => {
-	return isAuth ? children : <Navigate to='/login' replace />
+const PrivateRoute = ({ isAuth }) => {
+	return isAuth ? <Dashboard/> : <Navigate to='/login' replace />
 }
 
 export default PrivateRoute
