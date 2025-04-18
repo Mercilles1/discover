@@ -3,11 +3,11 @@ import { Trash2 } from 'lucide-react';
 
 export default function Cart() {
   const [cartProducts, setCartProducts] = useState([]);
-  
+
   const allProducts = [
-    { id: 1, title: "Product 1", price: 25.99, img: "/path/to/img1.jpg" },
-    { id: 2, title: "Product 2", price: 45.50, img: "/path/to/img2.jpg" },
-    { id: 3, title: "Product 3", price: 30.00, img: "/path/to/img3.jpg" }
+    { id: 1, title: "Regular Fit Slogan", price: 1190, img: "/img1.jpg" },
+    { id: 2, title: "Regular Fit Polo", price: 1100, img: "/img2.jpg" },
+    { id: 3, title: "Regular Fit Black", price: 1290, img: "/img3.jpg" }
   ];
 
   useEffect(() => {
@@ -56,34 +56,34 @@ export default function Cart() {
   const total = subtotal + shipping;
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50 w-[390px]">
-      <div className="flex-1 overflow-auto p-4">
+    <div className="flex flex-col h-screen bg-white w-[390px] mx-auto">
+      <div className="px-4 py-4 border-b text-center text-lg font-semibold">My Cart</div>
+
+      <div className="flex-1 overflow-auto px-4 py-2">
         {cartProducts.length === 0 ? (
-          <div className="text-center py-8">
-            <p className="text-gray-500">Your cart is empty</p>
-          </div>
+          <div className="text-center py-8 text-gray-500">Your cart is empty</div>
         ) : (
           cartProducts.map(product => (
-            <div key={product.id} className="bg-white rounded-lg p-4 mb-4 flex">
-              <div className="w-16 h-16 bg-gray-200 rounded mr-4 flex-shrink-0">
-                {product.img && (
-                  <img src={product.img} alt={product.title} className="w-full h-full object-cover rounded" />
-                )}
+            <div key={product.id} className="bg-white border rounded-xl p-4 mb-4 shadow-sm flex">
+              <div className="w-20 h-20 rounded-lg overflow-hidden mr-4 flex-shrink-0">
+                <img src={product.img} alt={product.title} className="w-full h-full object-cover" />
               </div>
-              <div className="flex-1">
-                <div className="flex justify-between">
-                  <h2 className="font-medium text-base">{product.title}</h2>
-                  <button onClick={() => removeItem(product.id)} className="text-red-500">
-                    <Trash2 size={18} />
-                  </button>
+              <div className="flex-1 flex flex-col justify-between">
+                <div>
+                  <div className="flex justify-between items-start">
+                    <h2 className="text-base font-medium">{product.title}</h2>
+                    <button onClick={() => removeItem(product.id)} className="text-red-500">
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
+                  <p className="text-sm text-gray-500 mt-1">Size {product.selectedSize}</p>
                 </div>
-                <p className="text-gray-500 text-sm">Size {product.selectedSize}</p>
-                <div className="flex justify-between items-center mt-2">
-                  <p className="font-semibold">${product.price.toFixed(2)}</p>
-                  <div className="flex items-center border rounded">
-                    <button className="px-3 py-1" onClick={() => updateQuantity(product.id, -1)}>−</button>
+                <div className="flex justify-between items-center mt-3">
+                  <p className="font-semibold text-sm">${product.price.toLocaleString()}</p>
+                  <div className="flex items-center border rounded-md">
+                    <button onClick={() => updateQuantity(product.id, -1)} className="px-3 py-1 text-xl">−</button>
                     <span className="px-3">{product.quantity}</span>
-                    <button className="px-3 py-1" onClick={() => updateQuantity(product.id, 1)}>+</button>
+                    <button onClick={() => updateQuantity(product.id, 1)} className="px-3 py-1 text-xl">+</button>
                   </div>
                 </div>
               </div>
@@ -92,26 +92,26 @@ export default function Cart() {
         )}
       </div>
 
-      <div className="p-4 bg-white">
-        <div className="flex justify-between mb-2">
-          <span className="text-gray-600">Sub-total</span>
-          <span>${subtotal.toFixed(2)}</span>
+      <div className="p-4 bg-white border-t">
+        <div className="flex justify-between mb-2 text-sm text-gray-600">
+          <span>Sub-total</span>
+          <span>${subtotal.toLocaleString()}</span>
         </div>
-        <div className="flex justify-between mb-2">
-          <span className="text-gray-600">VAT (%)</span>
+        <div className="flex justify-between mb-2 text-sm text-gray-600">
+          <span>VAT (%)</span>
           <span>$ 0.00</span>
         </div>
-        <div className="flex justify-between mb-4">
-          <span className="text-gray-600">Shipping fee</span>
+        <div className="flex justify-between mb-4 text-sm text-gray-600">
+          <span>Shipping fee</span>
           <span>$ {shipping}</span>
         </div>
-        <div className="flex justify-between mb-6 font-bold">
+        <div className="flex justify-between mb-6 text-base font-semibold">
           <span>Total</span>
-          <span>$ {total.toFixed(2)}</span>
+          <span>$ {total.toLocaleString()}</span>
         </div>
-        <button className="bg-black text-white w-full py-3 rounded-lg flex items-center justify-center">
+        <button className="bg-black text-white w-full py-3 rounded-xl text-sm font-medium flex items-center justify-center">
           <span className="mr-2">Go To Checkout</span>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="20" height="20" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none">
             <path d="M5 12h14M12 5l7 7-7 7" />
           </svg>
         </button>
