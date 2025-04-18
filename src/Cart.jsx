@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Trash2 } from 'lucide-react';
 import arrow from './assets/Arrow.png'
 import bell from './assets/Bell.png'
+import korzin from './assets/Vector.png'
 import { useNavigate } from 'react-router-dom';
 
 export default function Cart() {
@@ -69,7 +70,11 @@ export default function Cart() {
 
             <div className="flex-1 overflow-auto px-4 py-2">
                 {cartProducts.length === 0 ? (
-                    <div className="text-center py-8 text-gray-500">Your cart is empty</div>
+                    <div className="flex flex-col items-center mt-[228px] ml-[71px]">
+                        <img src={korzin} alt="" />
+                        <p className='text-[#1A1A1A] text-[20px] font-600'>Your Cart Is Empty!</p>
+                        <p className='text-[16px] font-[400] text-[#808080] w-[248px]'>When you add products, they’ll appear here.</p>
+                    </div>
                 ) : (
                     cartProducts.map(product => (
                         <div key={product.id} className="bg-white border rounded-xl p-4 mb-4 shadow-sm flex">
