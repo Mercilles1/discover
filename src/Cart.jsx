@@ -70,10 +70,10 @@ export default function Cart() {
 
             <div className="flex-1 overflow-auto px-4 py-2">
                 {cartProducts.length === 0 ? (
-                    <div className="flex flex-col items-center mt-[228px] ml-[71px]">
+                    <div className="flex flex-col items-center mt-[228px] ml-[61px]">
                         <img src={korzin} alt="" />
                         <p className='text-[#1A1A1A] text-[20px] font-600'>Your Cart Is Empty!</p>
-                        <p className='text-[16px] font-[400] text-[#808080] w-[248px]'>When you add products, they’ll appear here.</p>
+                        <p className='text-center text-[16px] font-[400] text-[#808080] w-[248px]'>When you add products, they’ll appear here.</p>
                     </div>
                 ) : (
                     cartProducts.map(product => (
