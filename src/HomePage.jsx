@@ -16,6 +16,17 @@ function HomePage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    const toggleFavourite = (productId) => {
+        const stored = JSON.parse(localStorage.getItem("favourites")) || [];
+        let updated;
+        if (stored.includes(productId)) {
+          updated = stored.filter(id => id !== productId);
+        } else {
+          updated = [...stored, productId];
+        }
+        localStorage.setItem("favourites", JSON.stringify(updated));
+      };      
+
     useEffect(() => {
         const fetchProducts = async () => {
             try {
@@ -66,7 +77,11 @@ function HomePage() {
                             <img src={product.img} alt={product.title} />
                             <h2 className='mt-[8px] mb-[3px] text-[16px] font-[600]'>{product.title}</h2>
                             <p className='text-[12px] font-[500] text-[#808080]'>$ {product.price}</p>
-                            <img className='absolute rounded-[8px] right-[12px] top-[12px] bg-white p-[8px]' src={favourite} alt="" />
+                            <button
+                                onClick={() => toggleFavourite(product.id)}
+                            >
+                                <img className='absolute rounded-[8px] right-[12px] top-[12px] bg-white p-[8px]' src={favourite} alt="" />
+                            </button>
                         </div>
                     ))
                 }
