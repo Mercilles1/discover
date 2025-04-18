@@ -61,7 +61,7 @@ export default function Cart() {
     return (
         <div className="flex flex-col h-screen bg-white w-[390px] mx-auto">
             <div className="px-4 py-4 border-b text-center text-lg font-semibold">
-                <img onClick={() => ('/')} src={arrow} alt="" />
+                <img onClick={() => navigate("/")} src={arrow} alt="" />
                 <p>My cart</p>
             </div>
 
