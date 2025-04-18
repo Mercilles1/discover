@@ -20,10 +20,23 @@ const Login = ({ login }) => {
 	const navigate = useNavigate()
 
 	useEffect(() => {
-		fetch('https://marsgoup-1.onrender.com/api/users')
-			.then(res => res.json())
-			.then(data => setUsers(data))
-			// .catch(err => setError('Failed to fetch users'))
+		const fetchUsers = async () => {
+			try {
+				const response = await fetch(
+					'https://marsgoup-1.onrender.com/api/users'
+				)
+				if (!response.ok) {
+					throw new Error('Failed to fetch users')
+				}
+				const data = await response.json()
+				setUsers(data)
+			} catch (err) {
+				setError('Failed to fetch users')
+				console.error('Fetch error:', err)
+			}
+		}
+
+		fetchUsers()
 	}, [])
 
 	useEffect(() => {
@@ -34,27 +47,26 @@ const Login = ({ login }) => {
 	}, [navigate])
 
 	const handleLogin = () => {
-		if (
-			users.find(v => v.gmail === emailInput && v.password === passwordInput)
-		) {
-			const user = users.find(v => v.gmail === emailInput && v.password === passwordInput)
-			delete user.password
-			login(user)
+		const user = users.find(
+			v => v.gmail === emailInput && v.password === passwordInput
+		)
+		if (user) {
+			const userWithoutPassword = { ...user }
+			delete userWithoutPassword.password
+			login(userWithoutPassword)
 			navigate('/dashboard')
 		} else {
-			setError('Parol yoki emailda xatolik mavjud!')
+			setError('Incorrect email or password!')
 		}
 	}
 
 	const SearchForPassword = () => {
-		// Check if the input is empty
 		if (passwordInput.trim() === '') {
 			setBorderPassword('border-[#E6E6E6]')
 			setDisabled(true)
 			return
 		}
 
-		// Check password length
 		if (passwordInput.length > 3) {
 			setBorderPassword('border-[#0C9409]')
 			setDisabled(false)
@@ -63,16 +75,13 @@ const Login = ({ login }) => {
 		}
 	}
 
-	// Improved email validation
 	const SearchForEmail = () => {
-		// Check if the input is empty
 		if (emailInput.trim() === '') {
 			setEmail(null)
 			setBorderEmail('border-[#E6E6E6]')
 			return
 		}
 
-		// Using regex to validate email format
 		const emailRegex = /^[^\s@]+@gmail\.com$/i
 		if (emailRegex.test(emailInput)) {
 			setEmail(correct)
@@ -83,19 +92,16 @@ const Login = ({ login }) => {
 		}
 	}
 
-	// Handle email input change
 	const handleEmailChange = e => {
 		setEmailInput(e.target.value)
-		SearchForEmail() // Removed setTimeout
+		SearchForEmail()
 	}
 
-	// Handle password input change
 	const handlePasswordChange = e => {
 		setPasswordInput(e.target.value)
 		SearchForPassword()
 	}
 
-	// Toggle eye function
 	const toggleEye = () => {
 		setEye(eye === password1 ? password2 : password1)
 	}
@@ -128,7 +134,9 @@ const Login = ({ login }) => {
 									onChange={handleEmailChange}
 									onBlur={SearchForEmail}
 								/>
-								{email && <img src={email} alt='' className='w-[20px]' />}
+								{email && (
+									<img src={email} alt='Email status' className='w-[20px]' />
+								)}
 							</div>
 						</div>
 						<div className='flex flex-col gap-[4px]'>
@@ -147,7 +155,11 @@ const Login = ({ login }) => {
 								/>
 								<div className='flex items-center gap-[8px]'>
 									<button onClick={toggleEye}>
-										<img className='w-[20px]' src={eye} alt='' />
+										<img
+											className='w-[20px]'
+											src={eye}
+											alt='Toggle password visibility'
+										/>
 									</button>
 								</div>
 							</div>
@@ -157,7 +169,7 @@ const Login = ({ login }) => {
 					<div className='flex flex-col gap-[20px]'>
 						<p className='font-[Montserrat] font-[400] text-[#1a1a1a] text-[14px] flex items-center gap-[5px]'>
 							Forgot your password?
-							<a href='' className='underline text-[black] font-[500]'>
+							<a href='#' className='underline text-[black] font-[500]'>
 								Reset your password
 							</a>
 						</p>
@@ -166,7 +178,6 @@ const Login = ({ login }) => {
 							className='w-[100%] h-[54px] rounded-[10px] bg-[black] font-[Montserrat] font-[500] text-[white] text-[16px] flex items-center justify-center'
 							disabled={disabled}
 						>
-							{' '}
 							Login
 						</button>
 						<div className='flex items-center gap-[8px]'>
@@ -178,11 +189,11 @@ const Login = ({ login }) => {
 						</div>
 						<div className='flex flex-col gap-[16px]'>
 							<button className='w-[100%] border border-[#CCCCCC] rounded-[10px] h-[54px] flex items-center justify-center gap-[10px] font-[Montserrat] font-[500] text-[black] text-[16px]'>
-								<img src={google} alt='' />
+								<img src={google} alt='Google' />
 								Login with Google
 							</button>
 							<button className='w-[100%] bg-[#1877F2] h-[54px] rounded-[10px] flex items-center justify-center gap-[10px] font-[Montserrat] font-[500] text-[white] text-[16px]'>
-								<img src={facebook} alt='' />
+								<img src={facebook} alt='Facebook' />
 								Login with Facebook
 							</button>
 						</div>
@@ -191,7 +202,7 @@ const Login = ({ login }) => {
 				<div className='flex items-center justify-center'>
 					<p className='font-[Montserrat] font-[400] text-[#1a1a1a] text-[16px] flex items-center gap-[5px]'>
 						Don’t have an account?
-						<a href='' className='underline text-[black] font-[500]'>
+						<a href='#' className='underline text-[black] font-[500]'>
 							Join
 						</a>
 					</p>
