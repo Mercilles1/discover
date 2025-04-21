@@ -1,60 +1,65 @@
-import { NavLink, useParams } from 'react-router-dom';
+import { useParams, NavLink } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import back from './assets/back.png';
-import notification from './assets/notification.png';
-import shop from './assets/shop.png';
-import star from './assets/star.png';
+import back from '../assets/back.png';
+import notification from '../assets/notification.png';
+import shop from '../assets/shop.png';
+import star from '../assets/star.png';
 
 function ProductDetail() {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
+  const [error, setError]       = useState(null);
 
   useEffect(() => {
-    fetch(`https://marsgoup-1.onrender.com/api/products/${id}`)
-      .then(res => res.json())
-      .then(data => setProduct(data));
-  }, [id]);
+    (async()=> {
+      try {
+        const res = await fetch(`https://marsgoup-1.onrender.com/api/products/${id}`);
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        setProduct(Array.isArray(data)?data[0]:data);
+      } catch {
+        setError('Failed to fetch product');
+      }
+    })();
+  },[id]);
 
-  if (!product) return <p>Загрузка...</p>;
+  if (error) return <div className="px-[24px] pt-[12px] text-red-500">{error}</div>;
+  if (!product) return <div className="px-[24px] pt-[12px]">Loading...</div>;
 
   return (
-    <div className='mt-[12px] relative'>
-      <div className='px-[24px]'>
-        <div className='flex justify-between items-center'>
-          <NavLink to='/'>
-            <img className='w-[24px] h-[24px]' src={back} alt="" />
-          </NavLink>
-          <p className='text-[24px] text-[#1A1A1A] font-semibold font-[general sans]'>Details</p>
-          <img className='w-[24px] h-[24px]' src={notification} alt="" />
+    <div className="mx-auto w-full max-w-[390px] mt-[12px]">
+      <div className="px-[24px]">
+        <div className="flex justify-between items-center">
+          <NavLink to="/"><img src={back} alt="Back" className="w-[24px] h-[24px]"/></NavLink>
+          <p className="text-[24px] font-semibold">Details</p>
+          <img src={notification} alt="Notif" className="w-[24px] h-[24px]"/>
         </div>
-        <div className='flex justify-center items-center mt-[20px]'>
-          <img className='w-[341px] h-[368px] rounded-[10px]' src={product.img} alt='' />
-        </div>
-        <h2 className='text-[24px] font-semibold mt-[12px] font-[general sans]'>{product.title}</h2>
-        <p className='font-[general sans] mt-[15px]'><img className='w-[19px]' src={star} alt="" />{product.rating}</p>
-        <p className='text-[#808080] font-[general sans] mt-[13px]'>{product.about}</p>
-        <h3 className='text-[20px] font-semibold text-black font-[general sans]' style={{
-          WebkitTextStroke: '0.2px #E6E6E6',
-          color: '#1A1A1A'
-        }}>Choose size</h3>
-        <ul className='flex gap-[10px] mt-[12px] font-[general sans]'>
-          {product.sizes.map(size => (
-            <li className='w-[50px] h-[47px] border-[1.35px] border-[#E6E6E6] flex justify-center items-center rounded-[10px]' key={size.id}>{size.size}</li>
+        <img src={product.img||'https://via.placeholder.com/341x368'} alt={product.title}
+             className="w-full max-w-[341px] h-[368px] rounded-[10px] mt-[20px] mx-auto"/>
+        <h2 className="text-[24px] font-semibold mt-[12px]">{product.title}</h2>
+        <p className="flex items-center gap-1 mt-[15px]">
+          <img src={star} alt="Star" className="w-[19px]"/>{product.rating||'No rating'}
+        </p>
+        <p className="text-[#808080] mt-[13px]">{product.about}</p>
+        <h3 className="text-[20px] font-semibold mt-[12px]" style={{WebkitTextStroke:'0.2px #E6E6E6'}}>Choose size</h3>
+        <ul className="flex gap-[10px] mt-[12px]">
+          {product.sizes.map(s=>(
+            <li key={s.id} className="w-[50px] h-[47px] border flex justify-center items-center rounded-[10px]">
+              {s.size}
+            </li>
           ))}
         </ul>
       </div>
-
-
-      <hr className='text-[#E6E6E6] bg-[#E6E6E6] w-full h-[1px] mt-[12px]' />
-
-      <div className='px-[24px] flex items-center justify-between mt-[12px]'>
+      <hr className="bg-[#E6E6E6] w-full h-[1px] mt-[12px]"/>
+      <div className="px-[24px] flex justify-between items-center mt-[12px]">
         <div>
-          <p className='text-[#808080] text-[16px] font-[general sans]'>Price</p>
-          <p className='text-[#1A1A1A] text-[24px] font-semibold font-[general sans]'>$ {product.price}</p>
+          <p className="text-[#808080]">Price</p>
+          <p className="text-[24px] font-semibold">$ {product.price}</p>
         </div>
-        <div>
-          <button className='text-white font-medium bg-[#1A1A1A] rounded-[10px] flex items-center w-[240px] h-[54px] justify-center gap-[10px]'><img className='w-[24px] h-[24px]' src={shop} alt="" />Add to Cart</button>
-        </div>
+        <button className="flex items-center justify-center gap-[10px] bg-black text-white w-[240px] h-[54px] rounded-[10px]">
+          <img src={shop} alt="Cart" className="w-[24px] h-[24px]"/>
+          Add to Cart
+        </button>
       </div>
     </div>
   );
