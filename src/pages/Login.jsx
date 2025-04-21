@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
 import password1 from '../assets/Password1.svg'
 import password2 from '../assets/Password2.svg'
 import mistake from '../assets/Danger.svg'
@@ -202,9 +202,9 @@ const Login = ({ login }) => {
 				<div className='flex items-center justify-center'>
 					<p className='font-[Montserrat] font-[400] text-[#1a1a1a] text-[16px] flex items-center gap-[5px]'>
 						Don’t have an account?
-						<a href='#' className='underline text-[black] font-[500]'>
+						<NavLink to='/register' className='underline text-[black] font-[500]'>
 							Join
-						</a>
+						</NavLink>
 					</p>
 				</div>
 			</div>

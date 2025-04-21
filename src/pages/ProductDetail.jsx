@@ -27,7 +27,7 @@ function ProductDetail() {
   if (!product) return <div className="px-[24px] pt-[12px]">Loading...</div>;
 
   return (
-    <div className="mx-auto w-full max-w-[390px] mt-[12px]">
+    <div className="mx-auto w-full max-w-[390px] mt-[12px] pb-[100px]">
       <div className="px-[24px]">
         <div className="flex justify-between items-center">
           <NavLink to="/"><img src={back} alt="Back" className="w-[24px] h-[24px]"/></NavLink>

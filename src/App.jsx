@@ -1,9 +1,15 @@
 import { useState, useEffect } from 'react';
-import { Routes, Route } from 'react-router-dom';  // ← убрали BrowserRouter/Router
+import { Routes, Route, Navigate } from 'react-router-dom';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import ProductDetail from './pages/ProductDetail';
+import HomePage from './pages/HomePage';
+import AccountPage from './pages/AccountPage';
+import CartPage from './pages/CartPage';
+import SavedPage from './pages/SavedPage';
+import SearchPage from './pages/SearchPage';
+import Register from './pages/Register';
 import PrivateRoute from './components/PrivateRoute';
 
 function App() {
@@ -31,71 +37,27 @@ function App() {
   if (loading) return <div>Loading...</div>;
 
   return (
-    <Routes>
-      <Route
-        path="/"
-        element={isAuth ? <Dashboard logout={logout} /> : <Home />}
-      />
-      <Route path="/login" element={<Login login={login} />} />
+    <div>
+      <Routes>
+        <Route
+          path="/"
+          element={isAuth ? <Navigate to="/dashboard" /> : <Home />}
+        />
+        <Route path="/login" element={<Login login={login} />} />
+        <Route path="/register" element={<Register login={login} />} />
 
-      <Route
-        path="/dashboard"
-        element={
-          <PrivateRoute isAuth={isAuth}>
-            <Dashboard logout={logout} />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path={`/dashboard/products/:id`}
-        element={
-          <PrivateRoute isAuth={isAuth}>
-            <ProductDetail />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path="/dashboard/search"
-        element={
-          <PrivateRoute isAuth={isAuth}>
-            <div className="w-[390px] px-[24px] pt-[12px] md:w-full">
-              <h1 className="text-2xl font-bold">Search Page</h1>
-            </div>
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path="/dashboard/saved"
-        element={
-          <PrivateRoute isAuth={isAuth}>
-            <div className="w-[390px] px-[24px] pt-[12px] md:w-full">
-              <h1 className="text-2xl font-bold">Saved Items</h1>
-            </div>
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path="/dashboard/cart"
-        element={
-          <PrivateRoute isAuth={isAuth}>
-            <div className="w-[390px] px-[24px] pt-[12px] md:w-full">
-              <h1 className="text-2xl font-bold">Shopping Cart</h1>
-            </div>
-          </PrivateRoute>
-        }
-      />
-	  
-      <Route
-        path="/dashboard/account"
-        element={
-          <PrivateRoute isAuth={isAuth}>
-            <div className="w-[390px] px-[24px] pt-[12px] md:w-full">
-              <h1 className="text-2xl font-bold">Account Page</h1>
-            </div>
-          </PrivateRoute>
-        }
-      />
-    </Routes>
+        <Route element={<PrivateRoute isAuth={isAuth} />}>
+          <Route path="/dashboard" element={<HomePage />}>
+            <Route index element={<Dashboard logout={logout} />} />
+            <Route path="search" element={<SearchPage />} />
+            <Route path="saved" element={<SavedPage />} />
+            <Route path="cart" element={<CartPage />} />
+            <Route path="account" element={<AccountPage logout={logout} />} />
+            <Route path="products/:id" element={<ProductDetail />} />
+          </Route>
+        </Route>
+      </Routes>
+    </div>
   );
 }
 
