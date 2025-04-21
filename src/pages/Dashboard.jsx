@@ -1,16 +1,18 @@
 import { useState, useEffect } from 'react'
-import { NavLink } from 'react-router-dom'
 import bell from '../assets/Bell.png'
 import lupa from '../assets/lupa.png'
 import micro from '../assets/Mic.png'
 import filter from '../assets/Filter.png'
 import favourite from '../assets/favourite.png'
+<<<<<<< HEAD
 import home from '../assets/homeNav.png'
 import lupaNav from '../assets/lupaNav.png'
 import favouriteNav from '../assets/favouriteNav.png'
 import cart from '../assets/Cart.png'
 import user from '../assets/user.png'
 import FilterModal from '../components/FilterModal'
+=======
+>>>>>>> main
 
 function Dashboard() {
   const [products, setProducts] = useState([])
@@ -18,6 +20,7 @@ function Dashboard() {
   const [error, setError] = useState(null)
   const [showFilter, setShowFilter] = useState(false)
 
+<<<<<<< HEAD
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -34,6 +37,26 @@ function Dashboard() {
         console.error('Fetch error:', error)
       }
     }
+=======
+	useEffect(() => {
+		const fetchProducts = async () => {
+			try {
+				const response = await fetch(
+					'https://marsgoup-1.onrender.com/api/products'
+				)
+				if (!response.ok) {
+					throw new Error('Network response was not ok')
+				}
+				const data = await response.json()
+				setProducts(data)
+				setLoading(false)
+			} catch (error) {
+				setError('Failed to fetch products')
+				setLoading(false)
+				console.error('Fetch error:', error)
+			}
+		}
+>>>>>>> main
 
     fetchProducts()
   }, [])
@@ -44,6 +67,7 @@ function Dashboard() {
     )
   }
 
+<<<<<<< HEAD
   if (error) {
     return (
       <div className='w-[390px] px-[24px] pt-[12px] text-red-500'>{error}</div>
@@ -58,6 +82,16 @@ function Dashboard() {
           <img className='w-[24px] h-[27px]' src={bell} alt='Notifications' />
         </button>
       </div>
+=======
+	return (
+		<div className='w-[390px] relative px-[24px] pt-[12px]'>
+			<div className='flex justify-between items-center'>
+				<h1 className='text-[32px] font-[600] text-[#1A1A1A]'>Discover</h1>
+				<button className='mt-[6px]'>
+					<img className='w-[24px] h-[27px]' src={bell} alt='Notifications' />
+				</button>
+			</div>
+>>>>>>> main
 
       <div className='flex justify-between mt-[16px] items-center'>
         <div className='flex justify-center items-center px-[20px] py-[14px] rounded-[10px] border-[1px] border-[#E6E6E6]'>
@@ -92,6 +126,7 @@ function Dashboard() {
         </p>
       </div>
 
+<<<<<<< HEAD
       <div className='cards mb-[100px] mt-[24px] flex justify-center items-center flex-wrap gap-[19px]'>
         {products.map(product => (
           <div
@@ -195,3 +230,39 @@ function Dashboard() {
 }
 
 export default Dashboard;
+=======
+			{error ? (
+				<div className='text-red-500 mt-[24px]'>{error}</div>
+			) : (
+				<div className='cards mb-[100px] mt-[24px] flex justify-center items-center flex-wrap gap-[19px]'>
+					{products.map(product => (
+						<div
+							key={product.id}
+							className='card relative flex flex-col justify-start'
+						>
+							<img
+								src={product.img || 'https://via.placeholder.com/150'}
+								alt={product.title}
+								className='w-[150px] h-[150px] object-cover'
+							/>
+							<h2 className='mt-[8px] mb-[3px] text-[16px] font-[600]'>
+								{product.title}
+							</h2>
+							<p className='text-[12px] font-[500] text-[#808080]'>
+								$ {product.price}
+							</p>
+							<img
+								className='absolute rounded-[8px] right-[12px] top-[12px] bg-white p-[8px]'
+								src={favourite}
+								alt='Favourite'
+							/>
+						</div>
+					))}
+				</div>
+			)}
+		</div>
+	)
+}
+
+export default Dashboard
+>>>>>>> main
