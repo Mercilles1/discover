@@ -1,20 +1,23 @@
 import { useState, useEffect } from 'react'
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom'
 import Home from './pages/Home'
 import Login from './pages/Login'
-import HomePage from './pages/HomePage'
+import Register from './pages/Register'
 import Dashboard from './pages/Dashboard'
 import PrivateRoute from './components/PrivateRoute'
 import AccountPage from './pages/AccountPage'
 import CartPage from './pages/CartPage'
 import SavedPage from './pages/SavedPage'
 import SearchPage from './pages/SearchPage'
-import Register from './pages/Register'
+import HomePage from './pages/HomePage'
 import ProductDetail from './pages/ProductDetail'
+import NotificationScreen from './pages/Notification'
 
 function App() {
   const [loading, setLoading] = useState(true)
   const [isAuth, setIsAuth] = useState(false)
+  const [showFilter, setShowFilter] = useState(false)
+  const navigate = useNavigate()
 
   useEffect(() => {
     const authStatus = localStorage.getItem('isAuth')
@@ -56,6 +59,7 @@ function App() {
             <Route path='cart' element={<CartPage />} />
             <Route path='account' element={<AccountPage logout={logout} />} />
             <Route path='products/:id' element={<ProductDetail />} />
+            <Route path='notifications' element={<NotificationScreen />} />
           </Route>
         </Route>
       </Routes>
