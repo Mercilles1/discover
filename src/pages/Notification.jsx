@@ -80,134 +80,132 @@ const IconCreditCard = () => (
   </svg>
 );
 
-
 export default function NotificationScreen() {
-    const [activeTab, setActiveTab] = useState('home');
-    const [currentScreen, setCurrentScreen] = useState('notifications');
-    const [readNotifications, setReadNotifications] = useState([]);
-    
-    const markAsRead = (id) => {
-      if (!readNotifications.includes(id)) {
-        setReadNotifications([...readNotifications, id]);
-      }
-    };
-    
-    const handleBackClick = () => {
-      setCurrentScreen('home');
-      setActiveTab('home');
-    };
-    
-    const notifications = [
-      {
-        id: 1,
-        group: 'Today',
-        icon: <IconTag />,
-        iconBg: 'bg-blue-100',
-        iconColor: 'text-blue-600',
-        title: '30% Special Discount!',
-        description: 'Special promotion only valid today'
-      },
-      {
-        id: 2,
-        group: 'Yesterday',
-        icon: <IconWallet />,
-        iconBg: 'bg-green-100',
-        iconColor: 'text-green-600',
-        title: 'Top Up E-wallet Successfully!',
-        description: 'You have top up your e-wallet'
-      },
-      {
-        id: 3,
-        group: 'Yesterday',
-        icon: <IconGift />,
-        iconBg: 'bg-purple-100',
-        iconColor: 'text-purple-600',
-        title: 'New Service Available!',
-        description: 'New feature that you can try in next times'
-      },
-      {
-        id: 4,
-        group: 'June 7, 2023',
-        icon: <IconCreditCard />,
-        iconBg: 'bg-red-100',
-        iconColor: 'text-red-600',
-        title: 'Credit Card Connected!',
-        description: 'Credit card has been linked'
-      },
-      {
-        id: 5,
-        group: 'June 7, 2023',
-        icon: <IconUser />,
-        iconBg: 'bg-gray-100',
-        iconColor: 'text-gray-600',
-        title: 'Account Setup Successful!',
-        description: 'Your account has been created'
-      }
-    ];
-    
-    const groupedNotifications = notifications.reduce((groups, notification) => {
-      if (!groups[notification.group]) {
-        groups[notification.group] = [];
-      }
-      groups[notification.group].push(notification);
-      return groups;
-    }, {});
-    
-    const HomeScreen = () => (
-      <div className="flex-1 flex flex-col items-center justify-center bg-white">
-        <div className="text-blue-500 mb-4">
-          <IconHome className="w-16 h-16" />
+  const [activeTab, setActiveTab] = useState('home');
+  const [currentScreen, setCurrentScreen] = useState('notifications');
+  const [readNotifications, setReadNotifications] = useState([]);
+  
+  const markAsRead = (id) => {
+    if (!readNotifications.includes(id)) {
+      setReadNotifications([...readNotifications, id]);
+    }
+  };
+  
+  const handleBackClick = () => {
+    setCurrentScreen('home');
+    setActiveTab('home');
+  };
+  
+  const notifications = [
+    {
+      id: 1,
+      group: 'Today',
+      icon: <IconTag />,
+      iconBg: 'bg-blue-100',
+      iconColor: 'text-blue-600',
+      title: '30% Special Discount!',
+      description: 'Special promotion only valid today'
+    },
+    {
+      id: 2,
+      group: 'Yesterday',
+      icon: <IconWallet />,
+      iconBg: 'bg-green-100',
+      iconColor: 'text-green-600',
+      title: 'Top Up E-wallet Successfully!',
+      description: 'You have top up your e-wallet'
+    },
+    {
+      id: 3,
+      group: 'Yesterday',
+      icon: <IconGift />,
+      iconBg: 'bg-purple-100',
+      iconColor: 'text-purple-600',
+      title: 'New Service Available!',
+      description: 'New feature that you can try in next times'
+    },
+    {
+      id: 4,
+      group: 'June 7, 2023',
+      icon: <IconCreditCard />,
+      iconBg: 'bg-red-100',
+      iconColor: 'text-red-600',
+      title: 'Credit Card Connected!',
+      description: 'Credit card has been linked'
+    },
+    {
+      id: 5,
+      group: 'June 7, 2023',
+      icon: <IconUser />,
+      iconBg: 'bg-gray-100',
+      iconColor: 'text-gray-600',
+      title: 'Account Setup Successful!',
+      description: 'Your account has been created'
+    }
+  ];
+  
+  const groupedNotifications = notifications.reduce((groups, notification) => {
+    if (!groups[notification.group]) {
+      groups[notification.group] = [];
+    }
+    groups[notification.group].push(notification);
+    return groups;
+  }, {});
+  
+  const HomeScreen = () => (
+    <div className="flex-1 flex flex-col items-center justify-center bg-white">
+      <div className="text-blue-500 mb-4">
+        <IconHome className="w-16 h-16" />
+      </div>
+      <h2 className="text-xl font-bold mb-4">Home Screen</h2>
+      <p className="text-gray-500 text-center px-4">
+        This is the home screen. You navigated here from the notifications screen.
+      </p>
+      <button 
+        className="mt-8 bg-blue-500 text-white px-4 py-2 rounded-lg"
+        onClick={() => {
+          setCurrentScreen('notifications');
+        }}
+      >
+        Back to Notifications
+      </button>
+    </div>
+  );
+  
+  const NotificationsScreen = () => (
+    <>
+      <div className="flex justify-between items-center p-3 bg-white border-b border-gray-200">
+        <div className="flex items-center gap-2">
+          <button 
+            className="hover:bg-gray-100 p-1 rounded-full"
+            onClick={handleBackClick}
+          >
+            <IconChevronLeft />
+          </button>
+          <h1 className="text-lg font-semibold">Notifications</h1>
         </div>
-        <h2 className="text-xl font-bold mb-4">Home Screen</h2>
-        <p className="text-gray-500 text-center px-4">
-          This is the home screen. You navigated here from the notifications screen.
-        </p>
-        <button 
-          className="mt-8 bg-blue-500 text-white px-4 py-2 rounded-lg"
-          onClick={() => {
-            setCurrentScreen('notifications');
-          }}
-        >
-          Back to Notifications
+        <button className="hover:bg-gray-100 p-1 rounded-full">
+          <IconBell />
         </button>
       </div>
-    );
-    
-    const NotificationsScreen = () => (
-      <>
-        <div className="flex justify-between items-center p-3 bg-white border-b border-gray-200">
-          <div className="flex items-center gap-2">
-            <button 
-              className="hover:bg-gray-100 p-1 rounded-full"
-              onClick={handleBackClick}
-            >
-              <IconChevronLeft />
-            </button>
-            <h1 className="text-lg font-semibold">Notifications</h1>
-          </div>
-          <button className="hover:bg-gray-100 p-1 rounded-full">
-            <IconBell />
-          </button>
-        </div>
-        
-        <div className="flex-1 overflow-auto">
-          {Object.entries(groupedNotifications).map(([group, items]) => (
-            <div key={group} className="px-3 pt-3">
-              <p className="text-sm font-medium text-gray-500">{group}</p>
-              
-              {items.map(notification => (
-                <div 
-                  key={notification.id}
-                  className={`mt-2 bg-white rounded-lg p-3 shadow-sm flex items-start gap-3 ${
-                    readNotifications.includes(notification.id) ? 'opacity-60' : ''
-                  }`}
-                  onClick={() => markAsRead(notification.id)}
-                >
-                  <div className={`p-2 ${notification.iconBg} rounded-full flex-shrink-0`}>
-                    <div className={notification.iconColor}>{notification.icon}</div>
-                  </div>
-                  <div>
-
+      
+      <div className="flex-1 overflow-auto">
+        {Object.entries(groupedNotifications).map(([group, items]) => (
+          <div key={group} className="px-3 pt-3">
+            <p className="text-sm font-medium text-gray-500">{group}</p>
+            
+            {items.map(notification => (
+              <div 
+                key={notification.id}
+                className={`mt-2 bg-white rounded-lg p-3 shadow-sm flex items-start gap-3 ${
+                  readNotifications.includes(notification.id) ? 'opacity-60' : ''
+                }`}
+                onClick={() => markAsRead(notification.id)}
+              >
+                <div className={`p-2 ${notification.iconBg} rounded-full flex-shrink-0`}>
+                  <div className={notification.iconColor}>{notification.icon}</div>
+                </div>
+                <div>
                   <p className="font-medium">{notification.title}</p>
                   <p className="text-sm text-gray-500">{notification.description}</p>
                 </div>
@@ -223,23 +221,8 @@ export default function NotificationScreen() {
   return (
     <div className="flex flex-col h-screen w-full max-w-md mx-auto bg-gray-50 overflow-hidden">
       <div className="flex justify-between items-center p-2 text-xs bg-white">
-        <div>9:41</div>
-        <div className="flex items-center gap-1">
-          <div className="w-4 h-4">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M6 18L18 18" />
-              <path d="M10 14L18 14" />
-              <path d="M14 10L18 10" />
-              <path d="M17 6L18 6" />
-            </svg>
-          </div>
-          <div className="w-4 h-4">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M2 22L22 22" />
-              <path d="M17 2C18.6569 2 20 3.34315 20 5V19C20 20.6569 18.6569 22 17 22H7C5.34315 22 4 20.6569 4 19V5C4 3.34315 5.34315 2 7 2H17Z" />
-            </svg>
-          </div>
-        </div>
+       
+      
       </div>
       
       {currentScreen === 'notifications' ? <NotificationsScreen /> : <HomeScreen />}
@@ -311,4 +294,3 @@ export default function NotificationScreen() {
     </div>
   );
 }
-  
