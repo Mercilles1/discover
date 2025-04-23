@@ -50,6 +50,7 @@ function App() {
 				<Route element={<PrivateRoute isAuth={isAuth} />}>
 					<Route path='/dashboard' element={<HomePage />}>
 						<Route index element={<Dashboard />} />
+						<Route path='notifications' element={<Notification />} />
 						<Route path='search' element={<SearchPage />} />
 						<Route path='saved' element={<SavedPage />} />
 						<Route path='cart' element={<CartPage />} />

@@ -4,6 +4,7 @@ import lupa from '../assets/lupa.png'
 import micro from '../assets/Mic.png'
 import filter from '../assets/Filter.png'
 import favourite from '../assets/favourite.png'
+import { NavLink } from 'react-router-dom'
 
 function Dashboard() {
 	const [products, setProducts] = useState([])
@@ -42,9 +43,13 @@ function Dashboard() {
 		<div className='w-[390px] relative px-[24px] pt-[12px]'>
 			<div className='flex justify-between items-center'>
 				<h1 className='text-[32px] font-[600] text-[#1A1A1A]'>Discover</h1>
-				<button className='mt-[6px]'>
-					<img className='w-[24px] h-[27px]' src={bell} alt='Notifications' />
-				</button>
+				
+				<NavLink to='/dashboard/notifications' className='mt-[6px]'>
+                  <img className='w-[24px] h-[27px]' src={bell} alt='Notifications' />
+`				</NavLink>
+
+
+
 			</div>
 
 			<div className='flex justify-between mt-[16px] items-center'>
