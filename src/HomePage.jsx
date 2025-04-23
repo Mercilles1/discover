@@ -133,9 +133,10 @@ function HomePage() {
                 <div className="cards mb-[100px] mt-[24px] flex justify-center items-center flex-wrap gap-[19px]">
                     {filteredProducts.map((product) => (
                         <div key={product.id} className="card relative flex flex-col justify-start">
+                            
                             <img src={product.img} alt={product.title} />
                             <h2 className='mt-[8px] mb-[3px] text-[16px] font-[600]'>{product.title}</h2>
-                            <p className='text-[12px] font-[500] text-[#808080]'>$ {product.price}</p>
+                            <p className='text-[12px] font-[500] text-[#808080]'>${product.price}</p>
                             <p className='text-[10px] font-[400] text-gray-400'>{product.categories}</p>
                             <button>
                                 <img className='absolute rounded-[8px] right-[12px] top-[12px] bg-white p-[8px]' src={favourite} alt="Add to favorites" />

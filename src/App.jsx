@@ -1,12 +1,8 @@
 import { useState } from 'react'
 import { BrowserRouter as Router, Routes, Route, NavLink } from 'react-router-dom'
 import HomePage from './HomePage'
-import home from './assets/homeNav.png'
-import lupaNav from './assets/lupaNav.png'
-import favouriteNav from './assets/favouriteNav.png'
-import cart from './assets/Cart.png'
-import user from './assets/user.png'
 import SearchPage from './SearchPage'
+import AccountPgae from './AccountPgae'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -20,7 +16,8 @@ function App() {
             <Route path="/search" element={<SearchPage/>} />
             <Route path="/saved" element={<div className='w-[390px] px-[24px] pt-[12px]'><h1 className='text-2xl font-bold'>Saved Items</h1></div>} />
             <Route path="/cart" element={<div className='w-[390px] px-[24px] pt-[12px]'><h1 className='text-2xl font-bold'>Shopping Cart</h1></div>} />
-            <Route path="/account" element={<div className='w-[390px] px-[24px] pt-[12px]'><h1 className='text-2xl font-bold'>Account Page</h1></div>} />
+            <Route path="/account" element={<AccountPgae/>} />
+       
           </Routes>
 
           {/* Shared Navigation Bar */}
