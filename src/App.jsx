@@ -12,6 +12,8 @@ import SearchPage from './pages/SearchPage'
 import HomePage from './pages/HomePage'
 import ProductDetail from './pages/ProductDetail'
 import NotificationScreen from './pages/Notification'
+import AddressPage from './pages/AddressPage'
+import AddAddressPage from './pages/AddAddressPage'
 
 function App() {
   const [loading, setLoading] = useState(true)
@@ -42,7 +44,7 @@ function App() {
   }
 
   return (
-    <div>
+    <div className='flex justify-center'>
       <Routes>
         <Route
           path='/'
@@ -60,6 +62,8 @@ function App() {
             <Route path='account' element={<AccountPage logout={logout} />} />
             <Route path='products/:id' element={<ProductDetail />} />
             <Route path='notifications' element={<NotificationScreen />} />
+            <Route path='address' element={<AddressPage/>} />
+            <Route path='addaddress' element={<AddAddressPage/>} />
           </Route>
         </Route>
       </Routes>

@@ -25,7 +25,7 @@ function SearchPage() {
   }, [recentSearches]);
 
   const goBack = () => {
-    window.location.href = "/";
+    window.location.href = "/dashboard";
   };
 
   const handleSearch = async (e) => {
