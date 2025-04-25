@@ -97,27 +97,30 @@ function Dashboard() {
 
       <div className='cards mb-[100px] mt-[24px] flex justify-center items-center flex-wrap gap-[19px]'>
         {products.map(product => (
-          <div
-            key={product.id}
-            className='card relative flex flex-col justify-start'
-          >
-            <img
-              src={product.img || 'https://via.placeholder.com/150'}
-              alt={product.title}
-              className='w-[150px] h-[150px] object-cover'
-            />
-            <h2 className='mt-[8px] mb-[3px] text-[16px] font-[600]'>
-              {product.title}
-            </h2>
-            <p className='text-[12px] font-[500] text-[#808080]'>
-              $ {product.price}
-            </p>
-            <img
-              className='absolute rounded-[8px] right-[12px] top-[12px] bg-white p-[8px]'
-              src={favourite}
-              alt='Favourite'
-            />
-          </div>
+          <NavLink to={`products/${product.id}`}>
+            <div
+              key={product.id}
+              className='card relative flex flex-col justify-start'
+            >
+              <img
+                src={product.img || 'https://via.placeholder.com/150'}
+                alt={product.title}
+                className='w-[150px] h-[150px] object-cover'
+              />
+              <h2 className='mt-[8px] mb-[3px] text-[16px] font-[600]'>
+                {product.title}
+              </h2>
+              <p className='text-[12px] font-[500] text-[#808080]'>
+                $ {product.price}
+              </p>
+              <img
+                className='absolute rounded-[8px] right-[12px] top-[12px] bg-white p-[8px]'
+                src={favourite}
+                alt='Favourite'
+              />
+            </div>
+          </NavLink>
+
         ))}
       </div>
 
