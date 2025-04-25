@@ -1,5 +1,3 @@
-// Пример исправленного кода без меток конфликта:
-
 import { useState, useEffect } from 'react'
 import { NavLink } from 'react-router-dom'
 import bell from '../assets/Bell.png'
@@ -18,27 +16,151 @@ function Dashboard() {
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const [showFilter, setShowFilter] = useState(false)
+  const [favorites, setFavorites] = useState([])
+  const [currentUser, setCurrentUser] = useState(null)
+  const [activeCategory, setActiveCategory] = useState('All')
 
   useEffect(() => {
-    const fetchProducts = async () => {
+    // Fetch products first
+    fetchProducts()
+
+    // Get current user from localStorage
+    const userStorage = localStorage.getItem('user')
+    if (userStorage) {
       try {
-        const response = await fetch('https://marsgoup-1.onrender.com/api/products')
-        if (!response.ok) {
-          throw new Error('Network response was not ok')
+        const parsedUser = JSON.parse(userStorage)
+        setCurrentUser(parsedUser)
+
+        // Fetch user's favorite items only if we have a valid user
+        // Use _id from MongoDB instead of id
+        if (parsedUser && (parsedUser._id || parsedUser.id)) {
+          const userId = parsedUser._id || parsedUser.id
+          fetchUserFavorites(userId)
         }
-        const data = await response.json()
-        setProducts(data)
-        setLoading(false)
       } catch (error) {
-        setError('Failed to fetch products')
-        setLoading(false)
-        console.error('Fetch error:', error)
+        console.error('Error parsing user from localStorage:', error)
+        // Clear invalid user data from localStorage
+        localStorage.removeItem('user')
       }
     }
-
-    fetchProducts()
   }, [])
+
+  const fetchUserFavorites = async (userId) => {
+    if (!userId) return
+
+    try {
+      const response = await fetch(`https://marsgoup-1.onrender.com/api/users/${userId}`)
+
+      // Check if response was successful
+      if (!response.ok) {
+        // If user not found (404), just set empty favorites and don't show error
+        if (response.status === 404) {
+          console.warn(`User with ID ${userId} not found. Using empty favorites.`)
+          setFavorites([])
+          return
+        }
+        throw new Error(`Failed to fetch user data: ${response.status}`)
+      }
+
+      const userData = await response.json()
+      if (userData && userData.favoriteItems) {
+        setFavorites(userData.favoriteItems)
+      } else {
+        // Initialize with empty array if favoriteItems is not present
+        setFavorites([])
+      }
+    } catch (error) {
+      console.error('Error fetching user favorites:', error)
+      // Don't stop the app from working if favorites can't be fetched
+      setFavorites([])
+    }
+  }
+
+  const fetchProducts = async () => {
+    try {
+      const response = await fetch('https://marsgoup-1.onrender.com/api/products')
+      if (!response.ok) {
+        throw new Error(`Network response was not ok: ${response.status}`)
+      }
+      const data = await response.json()
+      setProducts(data)
+      setLoading(false)
+    } catch (error) {
+      setError('Failed to fetch products')
+      setLoading(false)
+      console.error('Fetch error:', error)
+    }
+  }
+
+  const toggleFavorite = async (productId) => {
+    if (!currentUser || !currentUser.id) {
+      // If no user is logged in, prompt to log in instead of failing silently
+      alert('Please log in to save favorites')
+      return
+    }
+
+    try {
+      // Get the latest user data
+      const userResponse = await fetch(`https://marsgoup-1.onrender.com/api/users/${currentUser.id}`)
+
+      // If user not found on server, handle gracefully
+      if (userResponse.status === 404) {
+        console.warn('User not found on server. Unable to save favorites.')
+        return
+      }
+
+      if (!userResponse.ok) {
+        throw new Error(`Failed to fetch user data: ${userResponse.status}`)
+      }
+
+      const userData = await userResponse.json()
+      let updatedFavoriteItems = [...(userData.favoriteItems || [])]
+
+      // Check if product is already a favorite
+      const isFavorite = updatedFavoriteItems.includes(productId)
+
+      if (isFavorite) {
+        // Remove from favorites
+        updatedFavoriteItems = updatedFavoriteItems.filter(id => id !== productId)
+      } else {
+        // Add to favorites
+        updatedFavoriteItems.push(productId)
+      }
+
+      // Update user on the server
+      const updateResponse = await fetch(`https://marsgoup-1.onrender.com/api/users/${currentUser.id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          favoriteItems: updatedFavoriteItems
+        })
+      })
+
+      if (!updateResponse.ok) {
+        throw new Error(`Failed to update favorites: ${updateResponse.status}`)
+      }
+
+      // Update local state
+      setFavorites(updatedFavoriteItems)
+    } catch (error) {
+      console.error('Error toggling favorite:', error)
+      // Update UI optimistically even if server update fails
+      const newFavorites = favorites.includes(productId)
+        ? favorites.filter(id => id !== productId)
+        : [...favorites, productId]
+      setFavorites(newFavorites)
+    }
+  }
+
+  const filterProductsByCategory = (category) => {
+    setActiveCategory(category)
+  }
+
+  const filteredProducts = activeCategory === 'All'
+    ? products
+    : products.filter(product => product.categories === activeCategory)
 
   if (loading) {
     return (
@@ -56,10 +178,9 @@ function Dashboard() {
     <div className='w-[390px] relative px-[24px] pt-[12px]'>
       <div className='flex justify-between items-center'>
         <h1 className='text-[32px] font-[600] text-[#1A1A1A]'>Discover</h1>
-        <NavLink to='/dashboard/notifications' className='mt-[6px]'>
+        <button className='mt-[6px]'>
           <img className='w-[24px] h-[27px]' src={bell} alt='Notifications' />
-          `        </NavLink>
-
+        </button>
       </div>
 
       <div className='flex justify-between mt-[16px] items-center'>
@@ -72,32 +193,41 @@ function Dashboard() {
           />
           <img src={micro} alt='Microphone' />
         </div>
-        <button
-          className='w-[52px] h-[52px] bg-[#1A1A1A] flex justify-center items-center rounded-[10px]'
-          onClick={() => setShowFilter(true)}
-        >
+        <button className='w-[52px] h-[52px] bg-[#1A1A1A] flex justify-center items-center rounded-[10px]'>
           <img src={filter} alt='Filter' />
         </button>
       </div>
 
       <div className='sort mt-[16px] flex justify-center items-center gap-[8px]'>
-        <p className='px-[20px] py-[7px] border-[1px] border-[#E6E6E6] flex justify-center items-center rounded-[10px] hover:bg-black hover:text-white'>
+        <button
+          className={`px-[20px] py-[7px] border-[1px] ${activeCategory === 'All' ? 'bg-black text-white' : 'border-[#E6E6E6] hover:bg-black hover:text-white'} flex justify-center items-center rounded-[10px]`}
+          onClick={() => filterProductsByCategory('All')}
+        >
           All
-        </p>
-        <p className='px-[20px] py-[7px] border-[1px] border-[#E6E6E6] flex justify-center items-center rounded-[10px] hover:bg-black hover:text-white'>
+        </button>
+        <button
+          className={`px-[20px] py-[7px] border-[1px] ${activeCategory === 'T-shirt' ? 'bg-black text-white' : 'border-[#E6E6E6] hover:bg-black hover:text-white'} flex justify-center items-center rounded-[10px]`}
+          onClick={() => filterProductsByCategory('T-shirt')}
+        >
           Tshirts
-        </p>
-        <p className='px-[20px] py-[7px] border-[1px] border-[#E6E6E6] flex justify-center items-center rounded-[10px] hover:bg-black hover:text-white'>
+        </button>
+        <button
+          className={`px-[20px] py-[7px] border-[1px] ${activeCategory === 'Jeans' ? 'bg-black text-white' : 'border-[#E6E6E6] hover:bg-black hover:text-white'} flex justify-center items-center rounded-[10px]`}
+          onClick={() => filterProductsByCategory('Jeans')}
+        >
           Jeans
-        </p>
-        <p className='px-[20px] py-[7px] border-[1px] border-[#E6E6E6] flex justify-center items-center rounded-[10px] hover:bg-black hover:text-white'>
+        </button>
+        <button
+          className={`px-[20px] py-[7px] border-[1px] ${activeCategory === 'Shoes' ? 'bg-black text-white' : 'border-[#E6E6E6] hover:bg-black hover:text-white'} flex justify-center items-center rounded-[10px]`}
+          onClick={() => filterProductsByCategory('Shoes')}
+        >
           Shoes
-        </p>
+        </button>
       </div>
 
       <div className='cards mb-[100px] mt-[24px] flex justify-center items-center flex-wrap gap-[19px]'>
-        {products.map(product => (
-          <NavLink to={`products/${product.id}`}>
+        {filteredProducts.length > 0 ? (
+          filteredProducts.map(product => (
             <div
               key={product.id}
               className='card relative flex flex-col justify-start'
@@ -113,19 +243,25 @@ function Dashboard() {
               <p className='text-[12px] font-[500] text-[#808080]'>
                 $ {product.price}
               </p>
-              <img
-                className='absolute rounded-[8px] right-[12px] top-[12px] bg-white p-[8px]'
-                src={favourite}
-                alt='Favourite'
-              />
+              <button
+                onClick={() => toggleFavorite(product.id)}
+                className={`absolute rounded-[8px] right-[12px] top-[12px] ${favorites.includes(product.id) ? 'bg-red-500' : 'bg-white'
+                  } p-[8px]`}
+              >
+                <img
+                  src={favourite}
+                  alt='Favorite'
+                  className={favorites.includes(product.id) ? 'filter brightness-0 invert' : ''}
+                />
+              </button>
             </div>
-          </NavLink>
-
-        ))}
+          ))
+        ) : (
+          <div className="w-full text-center py-8 text-gray-500">
+            No products found in this category.
+          </div>
+        )}
       </div>
-
-      {/* Модальное окно фильтров */}
-      <FilterModal isOpen={showFilter} onClose={() => setShowFilter(false)} />
 
       <div className='nav w-[390px] fixed left-1/2 transform -translate-x-1/2 bg-white border-t-[1px] border-[#E6E6E6] bottom-0 h-[86px] px-[24px]'>
         <ul className='flex mt-[16px] justify-between items-center'>
@@ -195,4 +331,4 @@ function Dashboard() {
   )
 }
 
-export default Dashboard;
+export default Dashboard
