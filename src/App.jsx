@@ -10,6 +10,7 @@ import HomePage from './pages/Dashboard'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import PrivateRoute from './components/PrivateRoute'
+import Live from './Live'
 
 function App() {
 	const [loading, setLoading] = useState(true)
@@ -65,11 +66,12 @@ function App() {
 				<Route
 					path='/saved'
 					element={
-						<PrivateRoute isAuth={isAuth}>
-							<div className='w-[390px] px-[24px] pt-[12px]'>
-								<h1 className='text-2xl font-bold'>Saved Items</h1>
-							</div>
-						</PrivateRoute>
+						<Live />
+						// <PrivateRoute isAuth={isAuth}>
+						// 	<div className='w-[390px] px-[24px] pt-[12px]'>
+						// 		<h1 className='text-2xl font-bold'>Saved Items</h1>
+						// 	</div>
+						// </PrivateRoute>
 					}
 				/>
 				<Route
