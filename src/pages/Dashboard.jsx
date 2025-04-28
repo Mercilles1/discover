@@ -106,11 +106,10 @@ function Dashboard() {
           <button
             key={category}
             onClick={() => handleCategoryClick(category)}
-            className={`px-5 py-2 rounded-lg border transition-all ${
-              activeCategory === category
+            className={`px-[20px] py-[7px] border-[1px] border-[#E6E6E6] flex justify-center items-center rounded-[10px] whitespace-nowrap transition-all duration-200 ${activeCategory === category
                 ? 'bg-black text-white'
                 : 'bg-white text-black hover:bg-black hover:text-white'
-            }`}
+              }`}
           >
             {category}
           </button>
@@ -123,7 +122,7 @@ function Dashboard() {
       ) : (
         <div className='grid grid-cols-2 gap-5 mt-6 mb-24'>
           {filteredProducts.map(product => (
-            <div
+            <NavLink to={`/dashboard/products/${product.id}`}><div
               key={product.id}
               className='relative flex flex-col items-start bg-white rounded-lg overflow-hidden shadow-sm p-2'
             >
@@ -132,26 +131,35 @@ function Dashboard() {
                 alt={product.title}
                 className='w-full h-36 object-cover rounded-md'
               />
-              <h2 className='mt-2 text-sm font-semibold'>{product.title}</h2>
-              <p className='text-xs text-gray-500'>$ {product.price}</p>
-              <p className='text-[10px] text-gray-400'>{product.categories}</p>
-
-              {/* Favorite Button */}
-              <button className='absolute top-2 right-2 bg-white p-2 rounded-md shadow-md'>
-                <img className='w-5 h-5' src={favourite} alt='Add to favorites' />
+              <h2 className='mt-[8px] mb-[3px] text-[16px] font-[600]'>
+                {product.title}
+              </h2>
+              <p className='text-[12px] font-[500] text-[#808080]'>
+                $ {product.price}
+              </p>
+              <p className='text-[10px] font-[400] text-gray-400'>{product.categories}</p>
+              <button>
+                <img
+                  className='absolute rounded-[8px] right-[12px] top-[12px] bg-white p-[8px]'
+                  src={favourite}
+                  alt='Add to favorites'
+                />
               </button>
 
               {/* Add to Cart Button */}
               <button className='absolute bottom-2 right-2 bg-gray-300 p-1 rounded-full'>
                 <img className='w-4 h-4' src={plusCart} alt='Add to cart' />
               </button>
-            </div>
+            </div></NavLink>
+
           ))}
         </div>
       )}
 
       {/* Filter Modal */}
       <FilterModal isOpen={showFilter} onClose={() => setShowFilter(false)} />
+
+
     </div>
   );
 }

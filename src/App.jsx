@@ -14,6 +14,9 @@ import ProductDetail from './pages/ProductDetail'
 import NotificationScreen from './pages/Notification'
 import AddressPage from './pages/AddressPage'
 import AddAddressPage from './pages/AddAddressPage'
+import Payment from './pages/Payment'
+import Newcard from './pages/Newcard'
+import Mydetails from './pages/Mydetails'
 
 function App() {
   const [loading, setLoading] = useState(true)
@@ -64,6 +67,9 @@ function App() {
             <Route path='notifications' element={<NotificationScreen />} />
             <Route path='address' element={<AddressPage/>} />
             <Route path='addaddress' element={<AddAddressPage/>} />
+            <Route path='payment' element={<Payment />} />
+            <Route path='newcard' element={<Newcard />} />
+            <Route path='my-details' element={<Mydetails />} />
           </Route>
         </Route>
       </Routes>

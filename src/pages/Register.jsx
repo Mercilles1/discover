@@ -19,12 +19,10 @@ const Register = () => {
 	const [error, setError] = useState('')
 	const [users, setUsers] = useState([])
 	const [isLoading, setIsLoading] = useState(false)
-	const [isFetchingUsers, setIsFetchingUsers] = useState(false)
 	const navigate = useNavigate()
 
 	useEffect(() => {
 		const fetchUsers = async () => {
-			setIsFetchingUsers(true)
 			try {
 				const response = await fetch('https://marsgoup-1.onrender.com/api/users')
 				if (!response.ok) {
@@ -35,10 +33,9 @@ const Register = () => {
 			} catch (err) {
 				setError('Failed to load user data. Please try again.')
 				console.error('Fetch error:', err)
-			} finally {
-				setIsFetchingUsers(false)
 			}
 		}
+
 		fetchUsers()
 	}, [])
 
@@ -49,35 +46,63 @@ const Register = () => {
 		}
 	}, [navigate])
 
-	const isDisabled =
-		nameInput.trim().length < 2 ||
-		!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput) ||
-		passwordInput.length <= 3
+	const isDisabled = !(
+		nameInput?.trim() &&
+		emailInput?.trim() &&
+		passwordInput?.length > 3 &&
+		/^[^\s@]+@[^\s@]+\.[^\s@]+$/i.test(emailInput)
+	)
 
 	const validateName = () => {
-		const trimmed = nameInput.trim()
-		setBorderName(trimmed.length >= 2 ? 'border-[#0C9409]' : 'border-[#ED1010]')
+		if (nameInput.trim() === '') {
+			setBorderName('border-[#E6E6E6]')
+			return
+		}
+		setBorderName(
+			nameInput.trim().length >= 2 ? 'border-[#0C9409]' : 'border-[#ED1010]'
+		)
 	}
 
 	const validatePassword = () => {
+		if (passwordInput.trim() === '') {
+			setBorderPassword('border-[#E6E6E6]')
+			return
+		}
 		setBorderPassword(
 			passwordInput.length > 3 ? 'border-[#0C9409]' : 'border-[#ED1010]'
 		)
 	}
 
 	const validateEmail = () => {
-		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-		const isValid = emailRegex.test(emailInput)
-		setEmailStatus(isValid ? correct : mistake)
-		setBorderEmail(isValid ? 'border-[#0C9409]' : 'border-[#ED1010]')
+		if (emailInput.trim() === '') {
+			setEmailStatus(null)
+			setBorderEmail('border-[#E6E6E6]')
+			return
+		}
+		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/i
+		setEmailStatus(emailRegex.test(emailInput) ? correct : mistake)
+		setBorderEmail(
+			emailRegex.test(emailInput) ? 'border-[#0C9409]' : 'border-[#ED1010]'
+		)
 	}
 
-	const handleNameChange = e => setNameInput(e.target.value)
-	const handleEmailChange = e => setEmailInput(e.target.value)
-	const handlePasswordChange = e => setPasswordInput(e.target.value)
+	const handleNameChange = e => {
+		setNameInput(e.target.value)
+		validateName()
+	}
+
+	const handleEmailChange = e => {
+		setEmailInput(e.target.value)
+		validateEmail()
+	}
+
+	const handlePasswordChange = e => {
+		setPasswordInput(e.target.value)
+		validatePassword()
+	}
 
 	const toggleEye = () => {
-		setEye(prev => (prev === password1 ? password2 : password1))
+		setEye(eye === password1 ? password2 : password1)
 	}
 
 	const handleRegister = async () => {
@@ -96,8 +121,7 @@ const Register = () => {
 				setError('This email and password is already registered!')
 			}
 			if (emailExists) {
-				setError('This email is already registered!')
-				setIsLoading(false)
+				setError('Email already registered!')
 				return
 			}
 			if (passwordExists) {
