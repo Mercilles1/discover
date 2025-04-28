@@ -77,79 +77,80 @@ function SearchPage() {
   };
 
   return (
-    <div className='w-[390px] pt-[20px] px-[24px]'>
+    <div className='w-full max-w-[390px] mx-auto pt-5 px-4'>
       <div className='flex items-center justify-between'>
         <button onClick={goBack}>
-          <img src={arrow} alt="Back" />
+          <img src={arrow} alt="Back" className='w-6 h-6 md:w-8 md:h-8' />
         </button>
-        <h1 className='text-[24px] font-[600]'>Search</h1>
-        <button className='mt-[6px]'>
-          <img className='w-[24px] h-[27px]' src={bell} alt="Notifications" />
+        <h1 className='text-lg md:text-xl font-semibold'>Search</h1>
+        <button className='mt-1'>
+          <img className='w-6 h-6 md:w-7 md:h-7' src={bell} alt="Notifications" />
         </button>
       </div>
+
       <form onSubmit={handleSearchSubmit}>
-        <div className='flex justify-start mt-[18px] items-center px-[20px] py-[14px] rounded-[10px] border-[1px] border-[#E6E6E6]'>
-          <img className='mr-[12px]' src={lupa} alt="Search" />
+        <div className='flex items-center mt-5 px-4 py-3 rounded-lg border border-[#E6E6E6]'>
+          <img className='w-5 h-5 mr-3' src={lupa} alt="Search" />
           <input
-            className='w-[240px] h-[22px] outline-none text-[16px] font-[400] placeholder:text-[#999999]'
+            className='flex-1 h-6 md:h-8 outline-none text-base placeholder:text-gray-400'
             placeholder='Search for clothes...'
             type="text"
             value={searchTerm}
             onChange={handleSearch}
           />
-          <img className='' src={micro} alt="Voice search" />
+          <img className='w-5 h-5' src={micro} alt="Voice search" />
         </div>
       </form>
 
       {isSearching && searchResults.length > 0 && (
-        <div className='mt-4'>
-          <h2 className='text-[20px] font-[600] mb-2'>Results</h2>
-          <div className='max-h-[300px] overflow-y-auto'>
+        <div className='mt-6'>
+          <h2 className='text-lg font-semibold mb-3'>Results</h2>
+          <div className='max-h-[300px] overflow-y-auto space-y-3'>
             {searchResults.map(product => (
-              <div key={product._id} className='flex items-center py-3 border-b border-[#E6E6E6]'>
-                <NavLink to={`/dashboard/products/${product.id}`} className='flex-grow flex items-center'>
-                <div className='w-12 h-12 bg-gray-200 rounded-md flex-shrink-0 mr-3'>
+              <NavLink key={product._id} to={`/dashboard/products/${product.id}`} className='flex items-center p-3 border-b border-[#E6E6E6]'>
+                <div className='w-14 h-14 bg-gray-200 rounded-md flex-shrink-0 mr-4'>
                   {product.img && <img src={product.img} alt={product.title} className='w-full h-full object-cover rounded-md' />}
                 </div>
-                <div className='flex-grow'>
-                  <p className='text-[16px] font-[500]'>{product.title}</p>
-                  <p className='text-[14px] text-gray-500'>${product.price}</p>
+                <div className='flex-1'>
+                  <p className='text-sm font-medium'>{product.title}</p>
+                  <p className='text-xs text-gray-500'>${product.price}</p>
                 </div>
-                <img src={secArrow} alt="" />
-                </NavLink>
-              </div>
+                <img src={secArrow} alt="Go" className='w-4 h-4 ml-2' />
+              </NavLink>
             ))}
           </div>
         </div>
       )}
 
       {isSearching && searchTerm.trim() && searchResults.length === 0 && (
-        <div className='mt-4 text-center py-4'>
-          <p className='text-gray-500'>No products "{searchTerm}"</p>
+        <div className='mt-6 text-center py-6'>
+          <p className='text-gray-400'>No products "{searchTerm}"</p>
         </div>
       )}
 
       {!isSearching && (
         <>
-          <div className='flex justify-between items-center mt-[16px]'>
-            <h2 className='text-[20px] font-[600]'>Recent Searches</h2>
-            <button onClick={clearAllRecentSearches} className=''><u>Clear all</u></button>
+          <div className='flex justify-between items-center mt-6'>
+            <h2 className='text-lg font-semibold'>Recent Searches</h2>
+            {recentSearches.length > 0 && (
+              <button onClick={clearAllRecentSearches} className='text-sm text-blue-500 underline'>Clear all</button>
+            )}
           </div>
-          <div className="recentSearches">
+          <div className="mt-4 space-y-4">
             {recentSearches.length > 0 ? (
               recentSearches.map((search, index) => (
-                <div key={index} className='flex justify-between mt-[14px] border-[#E6E6E6] items-center border-b pb-[12px]'>
-                  <p className='text-[16px] font-[400]'>{search}</p>
+                <div key={index} className='flex justify-between items-center border-b pb-3'>
+                  <p className='text-base'>{search}</p>
                   <img
                     src={cancel}
                     alt="Remove"
                     onClick={() => removeRecentSearch(search)}
-                    className='cursor-pointer'
+                    className='w-5 h-5 cursor-pointer'
                   />
                 </div>
               ))
             ) : (
-              <p className='text-[16px] text-gray-400 mt-4'>No recent searches</p>
+              <p className='text-gray-400 text-center mt-6'>No recent searches</p>
             )}
           </div>
         </>

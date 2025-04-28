@@ -5,158 +5,162 @@ import arrow from '../assets/Arrow.png';
 import box from '../assets/Box.png';
 import go from '../assets/Chevron.png';
 import logout from '../assets/Logout.png';
-import details from '../assets/Details.png'
-import adress from '../assets/Address.png'
-import card from '../assets/Card.png'
-import quastion from '../assets/Question.png'
-import headphones from '../assets/Headphones.png'
-import warning from '../assets/Warning.png'
+import details from '../assets/Details.png';
+import adress from '../assets/Address.png';
+import card from '../assets/Card.png';
+import quastion from '../assets/Question.png';
+import headphones from '../assets/Headphones.png';
+import warning from '../assets/Warning.png';
 
 function AccountPage() {
-    const [showLogoutForm, setShowLogoutForm] = useState(false);
-    const navigate = useNavigate();
+  const [showLogoutForm, setShowLogoutForm] = useState(false);
+  const navigate = useNavigate();
 
-    const goBack = () => {
-        window.location.href = "/";
-    };
-    
-    const handleLogoutClick = () => {
-        setShowLogoutForm(true);
-    };
-    
-    const handleCancelLogout = () => {
-        setShowLogoutForm(false);
-    };
-    
-    const handleConfirmLogout = () => {
-        // Очищаем localStorage (где хранится флаг авторизации)
-        localStorage.removeItem('isAuth');
-        
-        // Если в локальном хранилище есть другие данные пользователя, их тоже нужно удалить
-        localStorage.removeItem('user');
-        
-        // Перенаправляем на страницу логина
-        navigate('/login');
-    };
+  const goBack = () => {
+    navigate('/');
+  };
 
-    return (
-        <div className={`w-[390px] pt-[20px] relative ${showLogoutForm ? 'overflow-hidden' : ''}`}>
-            <div className={`${showLogoutForm ? 'filter blur-sm' : ''}`}>
-                <div className='flex items-center justify-between px-[24px]'>
-                    <button onClick={goBack}>
-                        <img src={arrow} alt="Back" />
-                    </button>
-                    <h1 className='text-[24px] font-[600]'>Account</h1>
-                    <button className='mt-[6px]'>
-                        <img className='w-[24px] h-[27px]' src={bell} alt="Notifications" />
-                    </button>
-                </div>
+  const handleLogoutClick = () => {
+    setShowLogoutForm(true);
+  };
 
-                <NavLink to="/my-orders" className="no-underline text-inherit">
-                    <div className='flex px-[24px] justify-between border-t-[1px] mt-[14px] border-[#E6E6E6] items-center py-[22px]'>
-                        <div className='flex gap-[16px] justify-center items-center'>
-                            <img src={box} alt="" />
-                            <p>My orders</p>
-                        </div>
-                        <img src={go} alt="" />
-                    </div>
-                </NavLink>
+  const handleCancelLogout = () => {
+    setShowLogoutForm(false);
+  };
 
-                <div className='w-[390px] h-[8px] bg-[#E6E6E6]'></div>
+  const handleConfirmLogout = () => {
+    localStorage.removeItem('isAuth');
+    localStorage.removeItem('user');
+    navigate('/login');
+  };
 
-                <NavLink to="/my-details" className="no-underline text-inherit">
-                    <div className='flex px-[24px] justify-between border-t-[1px] border-[#E6E6E6] items-center py-[22px]'>
-                        <div className='flex gap-[16px] justify-center items-center'>
-                            <img src={details} alt="" />
-                            <p>My Details</p>
-                        </div>
-                        <img src={go} alt="" />
-                    </div>
-                </NavLink>
-
-                <NavLink to="/address-book" className="no-underline text-inherit">
-                    <div className='flex px-[24px] justify-between border-t-[1px] border-[#E6E6E6] items-center py-[22px]'>
-                        <div className='flex gap-[16px] justify-center items-center'>
-                            <img src={adress} alt="" />
-                            <p>Address Book</p>
-                        </div>
-                        <img src={go} alt="" />
-                    </div>
-                </NavLink>
-
-                <NavLink to="/payment-methods" className="no-underline text-inherit">
-                    <div className='flex px-[24px] justify-between border-t-[1px] border-[#E6E6E6] items-center py-[22px]'>
-                        <div className='flex gap-[16px] justify-center items-center'>
-                            <img src={card} alt="" />
-                            <p>Payment Methods</p>
-                        </div>
-                        <img src={go} alt="" />
-                    </div>
-                </NavLink>
-
-                <NavLink to="/notifications" className="no-underline text-inherit">
-                    <div className='flex px-[24px] justify-between border-t-[1px] border-[#E6E6E6] items-center py-[22px]'>
-                        <div className='flex gap-[16px] justify-center items-center'>
-                            <img src={bell} alt="" />
-                            <p>Notifications</p>
-                        </div>
-                        <img src={go} alt="" />
-                    </div>
-                </NavLink>
-
-                <div className='w-[390px] h-[8px] bg-[#E6E6E6]'></div>
-
-                <NavLink to="/faqs" className="no-underline text-inherit">
-                    <div className='flex px-[24px] justify-between border-t-[1px] border-[#E6E6E6] items-center py-[22px]'>
-                        <div className='flex gap-[16px] justify-center items-center'>
-                            <img src={quastion} alt="" />
-                            <p>FAQs</p>
-                        </div>
-                        <img src={go} alt="" />
-                    </div>
-                </NavLink>
-
-                <NavLink to="/help-center" className="no-underline text-inherit">
-                    <div className='flex px-[24px] justify-between border-t-[1px] border-[#E6E6E6] items-center py-[22px]'>
-                        <div className='flex gap-[16px] justify-center items-center'>
-                            <img src={headphones} alt="" />
-                            <p>Help Center</p>
-                        </div>
-                        <img src={go} alt="" />
-                    </div>
-                </NavLink>
-
-                <div className='w-[390px] h-[8px] bg-[#E6E6E6]'></div>
-
-                <div className='flex justify-start gap-[16px] items-center px-[24px] py-[24px]'>
-                    <img src={logout} alt="" />
-                    <button className='text-[16px] text-[#ED1010]' onClick={handleLogoutClick}>Logout</button>
-                </div>
-            </div>
-            
-            {showLogoutForm && (
-                <div className='fixed inset-0 flex items-center justify-center z-50 bg-white bg-opacity-30'>
-                    <div className='logout_form flex flex-col justify-center items-center p-[24px] rounded-[20px] bg-white shadow-lg'>
-                        <img src={warning} alt="" />
-                        <p className='text-[20px] mt-[12px] font-[600]'>Logout?</p>
-                        <p className='text-[16px] mt-[8px]'>Are you sure you want to logout?</p>
-                        <button 
-                            className='text-white w-[293px] mt-[24px] h-[54px] bg-[#ED1010] rounded-[10px] flex justify-center items-center'
-                            onClick={handleConfirmLogout}
-                        >
-                            Yes, Logout
-                        </button>
-                        <button 
-                            className='w-[293px] mt-[12px] h-[54px] border border-[#CCCCCC] rounded-[10px] flex justify-center items-center'
-                            onClick={handleCancelLogout}
-                        >
-                            No, Cancel
-                        </button>
-                    </div>
-                </div>
-            )}
+  return (
+    <div className={`max-w-[500px] mx-auto w-full pt-5 relative px-4 ${showLogoutForm ? 'overflow-hidden' : ''}`}>
+      <div className={`${showLogoutForm ? 'filter blur-sm' : ''}`}>
+        {/* Header */}
+        <div className='flex items-center justify-between'>
+          <button onClick={goBack}>
+            <img src={arrow} alt="Back" />
+          </button>
+          <h1 className='text-[22px] md:text-[26px] font-semibold'>Account</h1>
+          <button>
+            <img className='w-6 h-6 md:w-7 md:h-7' src={bell} alt="Notifications" />
+          </button>
         </div>
-    );
+
+        {/* Menu Items */}
+        <div className='mt-6 space-y-1'>
+          <NavLink to="/my-orders" className="block no-underline text-inherit">
+            <div className='flex items-center justify-between py-4 border-b border-gray-200'>
+              <div className='flex items-center gap-4'>
+                <img src={box} alt="My Orders" />
+                <p className='text-[16px] md:text-[18px]'>My orders</p>
+              </div>
+              <img src={go} alt="Go" />
+            </div>
+          </NavLink>
+
+          <NavLink to="/my-details" className="block no-underline text-inherit">
+            <div className='flex items-center justify-between py-4 border-b border-gray-200'>
+              <div className='flex items-center gap-4'>
+                <img src={details} alt="My Details" />
+                <p className='text-[16px] md:text-[18px]'>My Details</p>
+              </div>
+              <img src={go} alt="Go" />
+            </div>
+          </NavLink>
+
+          <NavLink to="/address-book" className="block no-underline text-inherit">
+            <div className='flex items-center justify-between py-4 border-b border-gray-200'>
+              <div className='flex items-center gap-4'>
+                <img src={adress} alt="Address Book" />
+                <p className='text-[16px] md:text-[18px]'>Address Book</p>
+              </div>
+              <img src={go} alt="Go" />
+            </div>
+          </NavLink>
+
+          <NavLink to="/payment-methods" className="block no-underline text-inherit">
+            <div className='flex items-center justify-between py-4 border-b border-gray-200'>
+              <div className='flex items-center gap-4'>
+                <img src={card} alt="Payment Methods" />
+                <p className='text-[16px] md:text-[18px]'>Payment Methods</p>
+              </div>
+              <img src={go} alt="Go" />
+            </div>
+          </NavLink>
+
+          <NavLink to="/notifications" className="block no-underline text-inherit">
+            <div className='flex items-center justify-between py-4 border-b border-gray-200'>
+              <div className='flex items-center gap-4'>
+                <img src={bell} alt="Notifications" />
+                <p className='text-[16px] md:text-[18px]'>Notifications</p>
+              </div>
+              <img src={go} alt="Go" />
+            </div>
+          </NavLink>
+        </div>
+
+        {/* Divider */}
+        <div className='h-2 bg-gray-100 my-4'></div>
+
+        {/* Other Sections */}
+        <div className='space-y-1'>
+          <NavLink to="/faqs" className="block no-underline text-inherit">
+            <div className='flex items-center justify-between py-4 border-b border-gray-200'>
+              <div className='flex items-center gap-4'>
+                <img src={quastion} alt="FAQs" />
+                <p className='text-[16px] md:text-[18px]'>FAQs</p>
+              </div>
+              <img src={go} alt="Go" />
+            </div>
+          </NavLink>
+
+          <NavLink to="/help-center" className="block no-underline text-inherit">
+            <div className='flex items-center justify-between py-4 border-b border-gray-200'>
+              <div className='flex items-center gap-4'>
+                <img src={headphones} alt="Help Center" />
+                <p className='text-[16px] md:text-[18px]'>Help Center</p>
+              </div>
+              <img src={go} alt="Go" />
+            </div>
+          </NavLink>
+        </div>
+
+        {/* Logout Button */}
+        <div className='h-2 bg-gray-100 my-4'></div>
+        <div className='flex items-center gap-4 px-2 py-4'>
+          <img src={logout} alt="Logout" />
+          <button className='text-[16px] md:text-[18px] text-red-500' onClick={handleLogoutClick}>
+            Logout
+          </button>
+        </div>
+      </div>
+
+      {/* Logout Modal */}
+      {showLogoutForm && (
+        <div className='fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-30 p-4'>
+          <div className='w-full max-w-sm bg-white rounded-2xl shadow-xl p-6 text-center'>
+            <img src={warning} alt="Warning" className="mx-auto" />
+            <h2 className='text-[20px] font-semibold mt-4'>Logout?</h2>
+            <p className='text-gray-500 mt-2'>Are you sure you want to logout?</p>
+            <button
+              className='w-full bg-red-500 text-white py-3 rounded-lg mt-6'
+              onClick={handleConfirmLogout}
+            >
+              Yes, Logout
+            </button>
+            <button
+              className='w-full border border-gray-300 py-3 rounded-lg mt-3'
+              onClick={handleCancelLogout}
+            >
+              No, Cancel
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default AccountPage;

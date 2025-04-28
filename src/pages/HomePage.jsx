@@ -3,13 +3,13 @@ import { NavLink, Outlet } from 'react-router-dom'
 
 const HomePage = () => {
   return (
-    <div>
+    <div className="w-full">
       <div>
         <Outlet />
       </div>
-      <div className='nav w-[390px] fixed left-1/2 transform -translate-x-1/2 bg-white border-t-[1px] border-[#E6E6E6] bottom-0 h-[86px] px-[24px]'>
-        <ul className='flex mt-[16px] justify-between items-center'>
-          <li>
+      <div className="nav fixed left-1/2 transform -translate-x-1/2 bg-white border-t-[1px] border-[#E6E6E6] bottom-0 w-full sm:w-[390px] h-[86px] px-[24px] py-[8px] sm:px-[24px] sm:py-[12px]">
+        <ul className="flex justify-between items-center gap-4 sm:gap-[16px]">
+          <li className="flex flex-col justify-center items-center">
             <NavLink to="/dashboard" end className="flex flex-col justify-center items-center">
               {({ isActive }) => (
                 <>
@@ -21,7 +21,7 @@ const HomePage = () => {
               )}
             </NavLink>
           </li>
-          <li>
+          <li className="flex flex-col justify-center items-center">
             <NavLink to="/dashboard/search" className="flex flex-col justify-center items-center">
               {({ isActive }) => (
                 <>
@@ -33,19 +33,13 @@ const HomePage = () => {
               )}
             </NavLink>
           </li>
-          <li>
+          <li className="flex flex-col justify-center items-center">
             <NavLink to="/dashboard/saved" className="flex flex-col justify-center items-center">
               {({ isActive }) => (
                 <>
                   <svg width="28" height="28px" viewBox="0 0 32 24" xmlns="http://www.w3.org/2000/svg">
                     <path
-                      d="M16 22
-   C16 22, 4 15, 4 8
-   C4 4.5, 7 2, 10.5 2
-   C13 2, 15 3.5, 16 5
-   C17 3.5, 19 2, 21.5 2
-   C25 2, 28 4.5, 28 8
-   C28 15, 16 22, 16 22Z"
+                      d="M16 22 C16 22, 4 15, 4 8 C4 4.5, 7 2, 10.5 2 C13 2, 15 3.5, 16 5 C17 3.5, 19 2, 21.5 2 C25 2, 28 4.5, 28 8 C28 15, 16 22, 16 22Z"
                       fill={isActive ? "#000000" : "none"}
                       stroke={isActive ? "#000000" : "#999999"}
                       strokeWidth="2"
@@ -58,7 +52,7 @@ const HomePage = () => {
               )}
             </NavLink>
           </li>
-          <li>
+          <li className="flex flex-col justify-center items-center">
             <NavLink to="/dashboard/cart" className="flex flex-col justify-center items-center">
               {({ isActive }) => (
                 <>
@@ -74,7 +68,7 @@ const HomePage = () => {
               )}
             </NavLink>
           </li>
-          <li>
+          <li className="flex flex-col justify-center items-center">
             <NavLink to="/dashboard/account" className="flex flex-col justify-center items-center">
               {({ isActive }) => (
                 <>
@@ -94,4 +88,4 @@ const HomePage = () => {
   )
 }
 
-export default HomePage
+export default HomePage;
