@@ -28,7 +28,7 @@ const Home = () => {
 	}, [])
 
 	return (
-		<div className='max-w-[390px] relative'>
+		<div className='w-[390px] relative'>
 			<div
 				className={`bg-[#1A1A1A] w-[100%] relative flex items-center justify-center h-screen transition-opacity duration-[1s] ${
 					first ? 'opacity-100' : 'opacity-0'
