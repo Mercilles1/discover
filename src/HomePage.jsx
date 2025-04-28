@@ -15,6 +15,17 @@ function HomePage() {
     const [activeCategory, setActiveCategory] = useState('All');
     const categories = ['All', 'Tshirts', 'Jeans', 'Shoes'];
 
+    const toggleFavourite = (productId) => {
+        const stored = JSON.parse(localStorage.getItem("favourites")) || [];
+        let updated;
+        if (stored.includes(productId)) {
+          updated = stored.filter(id => id !== productId);
+        } else {
+          updated = [...stored, productId];
+        }
+        localStorage.setItem("favourites", JSON.stringify(updated));
+      };      
+
     useEffect(() => {
         const fetchProducts = async () => {
             try {
@@ -136,13 +147,11 @@ function HomePage() {
                             
                             <img src={product.img} alt={product.title} />
                             <h2 className='mt-[8px] mb-[3px] text-[16px] font-[600]'>{product.title}</h2>
-                            <p className='text-[12px] font-[500] text-[#808080]'>${product.price}</p>
-                            <p className='text-[10px] font-[400] text-gray-400'>{product.categories}</p>
-                            <button>
-                                <img className='absolute rounded-[8px] right-[12px] top-[12px] bg-white p-[8px]' src={favourite} alt="Add to favorites" />
-                            </button>
-                            <button className='p-[4px] absolute right-[8px] bottom-0 h-[24px] bg-gray-300 rounded-full flex justify-center items-center'>
-                                <img className='w-[18px] h-[18px]' src={plusCart} alt="Add to cart" />
+                            <p className='text-[12px] font-[500] text-[#808080]'>$ {product.price}</p>
+                            <button
+                                onClick={() => toggleFavourite(product.id)}
+                            >
+                                <img className='absolute rounded-[8px] right-[12px] top-[12px] bg-white p-[8px]' src={favourite} alt="" />
                             </button>
                         </div>
                     ))}
