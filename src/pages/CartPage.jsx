@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Trash2 } from 'lucide-react';
 import arrow from '../assets/Arrow.png';
 import bell from '../assets/Bell.png';
-import korzin from '../assets/Vector.png';
+import korzin from '../assets/Vector (4).png';
 import { useNavigate } from 'react-router-dom';
 
 export default function Cart() {
@@ -173,7 +173,7 @@ export default function Cart() {
       <div className="px-4 py-4 border-b text-center text-lg font-semibold flex items-center justify-between gap-[16px]">
         <img onClick={() => navigate("/")} src={arrow} alt="" className="cursor-pointer" />
         <p>My cart</p>
-        <img onClick={() => navigate("/notes")} src={bell} alt="" className="cursor-pointer" />
+        <img onClick={() => navigate("/dashboard/notifications")} src={bell} alt="" className="cursor-pointer" />
       </div>
 
       <div className="flex-1 overflow-auto px-4 py-2">
