@@ -11,10 +11,17 @@ function AddAddressPage() {
     const [selectedNeighborhood, setSelectedNeighborhood] = useState('Выберите махаллю');
     const [mapInstance, setMapInstance] = useState(null);
     const [marker, setMarker] = useState(null);
+    const [isEditing, setIsEditing] = useState(false);
+    const [editingAddressId, setEditingAddressId] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [userId, setUserId] = useState("1"); // Set default userId to "1" directly
     const mapRef = useRef(null);
     const formRef = useRef(null);
     const containerRef = useRef(null);
     const navigate = useNavigate();
+    
+    // Constants
+    const API_BASE_URL = 'https://marsgoup-1.onrender.com/api';
 
     // Список махаллей (районов)
     const neighborhoods = [
@@ -33,6 +40,25 @@ function AddAddressPage() {
     ];
 
     useEffect(() => {
+        // Проверяем, редактируем ли существующий адрес
+        const editingAddress = localStorage.getItem('editingAddress');
+        if (editingAddress) {
+            try {
+                const parsedAddress = JSON.parse(editingAddress);
+                if (parsedAddress) {
+                    setIsEditing(true);
+                    setEditingAddressId(parsedAddress.id);
+                    setAddress(parsedAddress.fullAddress || '');
+                    setNickname(parsedAddress.nickname || 'home');
+                    setSelectedNeighborhood(parsedAddress.neighborhood || 'Выберите махаллю');
+                    
+                    localStorage.removeItem('editingAddress'); // Очищаем после загрузки
+                }
+            } catch (error) {
+                console.error('Error parsing editing address:', error);
+            }
+        }
+
         // Загружаем Яндекс Карты API только один раз
         if (!window.ymaps) {
             const loadYandexMaps = () => {
@@ -83,17 +109,31 @@ function AddAddressPage() {
             window.ymaps.ready(() => {
                 // Проверяем, инициализирована ли уже карта
                 if (mapRef.current && !mapRef.current.querySelector('.ymaps-2-1-79-map')) {
-                    // Центр Ташкента
+                    // Центр Ташкента или координаты редактируемого адреса
                     const tashkentCoords = [41.2995, 69.2401];
                     
+                    // Получаем координаты редактируемого адреса, если они есть
+                    let initialCoords = tashkentCoords;
+                    const editingAddress = localStorage.getItem('editingAddress');
+                    if (editingAddress) {
+                        try {
+                            const parsedAddress = JSON.parse(editingAddress);
+                            if (parsedAddress && parsedAddress.coords) {
+                                initialCoords = parsedAddress.coords;
+                            }
+                        } catch (error) {
+                            console.error('Error parsing editing address coordinates:', error);
+                        }
+                    }
+                    
                     const map = new window.ymaps.Map('map', {
-                        center: tashkentCoords,
-                        zoom: 12,
+                        center: initialCoords,
+                        zoom: 15, // Устанавливаем больший зум для режима редактирования
                         controls: ['zoomControl', 'searchControl']
                     });
 
                     // Создаем маркер
-                    const newMarker = new window.ymaps.Placemark(tashkentCoords, {
+                    const newMarker = new window.ymaps.Placemark(initialCoords, {
                         hintContent: 'Выберите адрес'
                     }, {
                         draggable: true
@@ -132,6 +172,11 @@ function AddAddressPage() {
                             expandForm(true);
                         });
                     });
+
+                    // Если это режим редактирования, расширяем форму
+                    if (isEditing) {
+                        expandForm(true);
+                    }
                 }
             });
         }
@@ -187,40 +232,82 @@ function AddAddressPage() {
         navigate('/dashboard/address');
     };
 
-    // Добавление адреса
-    const handleAddAddress = () => {
-        // Получаем текущие адреса из localStorage
-        let savedAddresses = [];
-        const savedAddressesStr = localStorage.getItem('savedAddresses');
-        
-        if (savedAddressesStr) {
-            try {
-                savedAddresses = JSON.parse(savedAddressesStr);
-            } catch (error) {
-                console.error('Error parsing saved addresses:', error);
-            }
-        }
-        
-        // Создаем новый адрес
-        const newAddress = {
-            id: Date.now(), // Используем timestamp как идентификатор
+    // Сохранение или обновление адреса
+    const handleSaveAddress = async () => {
+        // Создаем объект адреса с указанием пользователя
+        const addressData = {
+            id: isEditing ? editingAddressId : Date.now(),
             nickname: nickname,
             fullAddress: address,
             neighborhood: selectedNeighborhood,
-            // Добавляем координаты, если они нужны
-            coords: marker ? marker.geometry.getCoordinates() : null
+            coords: marker ? marker.geometry.getCoordinates() : null,
+            userId: userId // Use the fixed userId "1"
         };
         
-        // Добавляем новый адрес в массив
-        savedAddresses.push(newAddress);
-        
-        // Сохраняем обновленный массив в localStorage
-        localStorage.setItem('savedAddresses', JSON.stringify(savedAddresses));
-        
-        console.log('Adding address:', newAddress);
-        
-        // После сохранения возвращаемся на страницу адресов
-        navigate('/dashboard/address');
+        // Now save directly to API
+        try {
+            setIsLoading(true);
+            
+            // Fetch current user data from API
+            const response = await fetch(`${API_BASE_URL}/users/${userId}`);
+            
+            if (!response.ok) {
+                throw new Error(`Error fetching user data: ${response.status}`);
+            }
+            
+            const userData = await response.json();
+            
+            // Create a copy of the locations array or initialize it if empty
+            const updatedLocations = Array.isArray(userData.locations) 
+                ? [...userData.locations] 
+                : [];
+            
+            if (isEditing) {
+                // Находим индекс редактируемого адреса
+                const locationIndex = updatedLocations.findIndex(loc => 
+                    loc.id === editingAddressId
+                );
+                
+                if (locationIndex !== -1) {
+                    updatedLocations[locationIndex] = addressData;
+                } else {
+                    updatedLocations.push(addressData);
+                }
+            } else {
+                updatedLocations.push(addressData);
+            }
+            
+            // Create updated user object
+            const updatedUserData = {
+                ...userData,
+                locations: updatedLocations
+            };
+            
+            // Update user data in API
+            const updateResponse = await fetch(`${API_BASE_URL}/users/${userId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(updatedUserData)
+            });
+            
+            if (!updateResponse.ok) {
+                throw new Error(`Error updating user data: ${updateResponse.status}`);
+            }
+            
+            // Save the updated addresses to localStorage as well
+            localStorage.setItem('savedAddresses', JSON.stringify(updatedLocations));
+            
+            // Navigate back to address page
+            navigate('/dashboard/address');
+            
+        } catch (error) {
+            console.error('Error saving address:', error);
+            alert('An error occurred while saving your address. Please try again.');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -229,7 +316,7 @@ function AddAddressPage() {
                 <button onClick={goBack}>
                     <img src={arrow} alt="Back" />
                 </button>
-                <h1 className='text-[24px] font-[600]'>New Address</h1>
+                <h1 className='text-[24px] font-[600]'>{isEditing ? 'Edit Address' : 'New Address'}</h1>
                 <button className='mt-[6px]'>
                     <img className='w-[24px] h-[27px]' src={bell} alt="Notifications" />
                 </button>
@@ -308,10 +395,15 @@ function AddAddressPage() {
                 />
                 
                 <button 
-                    className='w-full h-[54px] bg-black text-white rounded-[10px] mt-[20px] mb-[20px]'
-                    onClick={handleAddAddress}
+                    className='w-full h-[54px] bg-black text-white rounded-[10px] mt-[20px] mb-[20px] flex justify-center items-center'
+                    onClick={handleSaveAddress}
+                    disabled={isLoading}
                 >
-                    Add
+                    {isLoading ? (
+                        <span className="mr-2">Saving...</span>
+                    ) : (
+                        isEditing ? 'Update' : 'Add'
+                    )}
                 </button>
             </div>
         </div>
