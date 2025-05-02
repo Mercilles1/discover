@@ -1,7 +1,20 @@
-import { useState } from 'react'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import HomePage from './HomePage'
-import Cart from './Cart.jsx'
+import { useState, useEffect } from 'react'
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom'
+import Home from './pages/Home'
+import Login from './pages/Login'
+import Register from './pages/Register'
+import Dashboard from './pages/Dashboard'
+import PrivateRoute from './components/PrivateRoute'
+import AccountPage from './pages/AccountPage'
+import CartPage from './pages/CartPage'
+import SavedPage from './pages/SavedPage'
+import SearchPage from './pages/SearchPage'
+import HomePage from './pages/HomePage'
+import ProductDetail from './pages/ProductDetail'
+import NotificationScreen from './pages/Notification'
+import AddressPage from './pages/AddressPage'
+import AddAddressPage from './pages/AddAddressPage'
+import Mydetails from './pages/Mydetails'
 
 function App() {
   const [loading, setLoading] = useState(true)
@@ -32,18 +45,31 @@ function App() {
   }
 
   return (
-    <Router>
-      <div className='flex justify-center'>
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/search" element={<div className='w-[390px] px-[24px] pt-[12px]'><h1 className='text-2xl font-bold'>Search Page</h1></div>} />
-          <Route path="/saved" element={<div className='w-[390px] px-[24px] pt-[12px]'><h1 className='text-2xl font-bold'>Saved Items</h1></div>} />
-          <Route path="/cart" element={<Cart />} />
-          <Route path="/account" element={<div className='w-[390px] px-[24px] pt-[12px]'><h1 className='text-2xl font-bold'>Account Page</h1></div>} />
-          <Route path="/notes" element={<div className='w-[390px] px-[24px] pt-[12px]'><h1 className='text-2xl font-bold'>Notifications</h1></div>} />
-        </Routes>
-      </div>
-    </Router>
+    <div className='flex justify-center'>
+      <Routes>
+        <Route
+          path='/'
+          element={isAuth ? <Navigate to='/dashboard' /> : <Home />}
+        />
+        <Route path='/login' element={<Login login={login} />} />
+        <Route path='/register' element={<Register login={login} />} />
+
+        <Route element={<PrivateRoute isAuth={isAuth} />}>
+          <Route path='/dashboard' element={<HomePage />}>
+            <Route index element={<Dashboard />} />
+            <Route path='search' element={<SearchPage />} />
+            <Route path='saved' element={<SavedPage />} />
+            <Route path='cart' element={<CartPage />} />
+            <Route path='account' element={<AccountPage logout={logout} />} />
+            <Route path='products/:id' element={<ProductDetail />} />
+            <Route path='notifications' element={<NotificationScreen />} />
+            <Route path='address' element={<AddressPage />} />
+            <Route path='addaddress' element={<AddAddressPage />} />
+            <Route path='my-details' element={<Mydetails />} />
+          </Route>
+        </Route>
+      </Routes>
+    </div>
   )
 }
 
