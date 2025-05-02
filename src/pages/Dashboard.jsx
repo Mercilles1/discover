@@ -31,7 +31,7 @@ function Dashboard() {
       const userStorage = localStorage.getItem('user');
       if (userStorage) {
         const parsedUser = JSON.parse(userStorage);
-        
+
         if (parsedUser && parsedUser.id) {
           setCurrentUser(parsedUser);
           fetchUserData(parsedUser._id);
@@ -42,7 +42,7 @@ function Dashboard() {
     }
 
     fetchProducts();
-    
+
   }, []);
 
   const fetchWithRetry = async (url, retries = 3, delay = 1000) => {
@@ -77,7 +77,7 @@ function Dashboard() {
       console.warn("Attempted to fetch user data without a valid userId");
       return;
     }
-    
+
     try {
       const userData = await fetchWithRetry(`https://marsgoup-1.onrender.com/api/users/${userId}`);
       if (userData && userData.favoriteItems) {
@@ -95,7 +95,7 @@ function Dashboard() {
 
   const filterProducts = () => {
     if (!products || products.length === 0) return;
-    
+
     let results = [...products];
     if (searchText.trim() !== '') {
       results = results.filter(product =>
@@ -124,7 +124,7 @@ function Dashboard() {
       return;
     }
     console.log(currentUser);
-    
+
 
     try {
       const userData = await fetchWithRetry(`https://marsgoup-1.onrender.com/api/users/${currentUser.id}`);
@@ -139,7 +139,7 @@ function Dashboard() {
         });
 
         if (!updateResponse.ok) throw new Error('Failed to update favorites');
-        
+
         // Update local state to reflect the change
         setUserFavorites(updatedFavorites);
         alert('Added to favorites!');
@@ -206,50 +206,53 @@ function Dashboard() {
           {filteredProducts.map((product) => {
             const productId = getProductId(product);
             if (!productId) return null;
-            
-            return (
-              <div key={productId} className="card relative flex flex-col justify-start">
-                <img
-                  src={product.img || '/placeholder-product.png'}
-                  alt={product.title}
-                  className="w-[150px] h-[150px] object-cover"
-                  onError={(e) => {
-                    e.target.onerror = null;
-                    e.target.src = '/placeholder-product.png';
-                  }}
-                />
-                <h2 className="mt-[8px] mb-[3px] text-[16px] font-[600]">{product.title}</h2>
-                <p className="text-[12px] font-[500] text-[#808080]">$ {product.price}</p>
 
-                <button 
-                  onClick={() => handleAddToFavorites(product)}
-                  aria-label="Add to favorites"
-                >
+            return (
+              <NavLink to={`products/${product.id}`} >
+                <div key={productId} className="card relative flex flex-col justify-start">
                   <img
-                    className={`absolute rounded-[8px] right-[12px] top-[12px] ${
-                      userFavorites.includes(productId)
+                    src={product.img || '/placeholder-product.png'}
+                    alt={product.title}
+                    className="w-[150px] h-[150px] object-cover"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = '/placeholder-product.png';
+                    }}
+                  />
+                  <h2 className="mt-[8px] mb-[3px] text-[16px] font-[600]">{product.title}</h2>
+                  <p className="text-[12px] font-[500] text-[#808080]">$ {product.price}</p>
+
+                  <button
+                    onClick={() => handleAddToFavorites(product)}
+                    aria-label="Add to favorites"
+                  >
+                    <img
+                      className={`absolute rounded-[8px] right-[12px] top-[12px] ${userFavorites.includes(productId)
                         ? 'bg-red-500 filter brightness-0 invert'
                         : 'bg-white'
-                    } p-[8px]`}
-                    src={favourite}
-                    alt="Favorite"
-                  />
-                </button>
+                        } p-[8px]`}
+                      src={favourite}
+                      alt="Favorite"
+                    />
+                  </button>
 
-                <button 
-                  className="p-[4px] absolute right-[8px] bottom-0 h-[24px] bg-gray-300 rounded-full flex justify-center items-center"
-                  aria-label="Add to cart"
-                >
-                  <img className="w-[18px] h-[18px]" src={plusCart} alt="Add to cart" />
-                </button>
-              </div>
+                  <button
+                    className="p-[4px] absolute right-[8px] bottom-0 h-[24px] bg-gray-300 rounded-full flex justify-center items-center"
+                    aria-label="Add to cart"
+                  >
+                    <img className="w-[18px] h-[18px]" src={plusCart} alt="Add to cart" />
+                  </button>
+                </div>
+              </NavLink>
+
             );
           })}
         </div>
-      )}
+      )
+      }
 
       <FilterModal isOpen={showFilter} onClose={() => setShowFilter(false)} />
-    </div>
+    </div >
   );
 }
 
