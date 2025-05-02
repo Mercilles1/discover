@@ -14,48 +14,83 @@ import ProductDetail from './pages/ProductDetail'
 import NotificationScreen from './pages/Notification'
 import AddressPage from './pages/AddressPage'
 import AddAddressPage from './pages/AddAddressPage'
-import Mydetails from './pages/Mydetails'
 
 function App() {
-  const [loading, setLoading] = useState(true)
-  const [isAuth, setIsAuth] = useState(false)
-  const [showFilter, setShowFilter] = useState(false)
-  const navigate = useNavigate()
+  const [loading, setLoading] = useState(true);
+  const [isAuth, setIsAuth] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const authStatus = localStorage.getItem('isAuth')
-    setIsAuth(authStatus === 'true')
-    setLoading(false)
-  }, [])
+    // Check authentication status
+    const authStatus = localStorage.getItem('isAuth');
+    
+    // Validate user data is present and valid if authenticated
+    if (authStatus === 'true') {
+      try {
+        const userData = localStorage.getItem('user');
+        if (!userData) {
+          // Missing user data - clear auth state
+          localStorage.setItem('isAuth', 'false');
+          setIsAuth(false);
+        } else {
+          // Validate user data has required fields
+          const parsedUser = JSON.parse(userData);
+          if (!parsedUser || !parsedUser.id) {
+            // Invalid user data - clear auth state
+            localStorage.setItem('isAuth', 'false');
+            localStorage.removeItem('user');
+            setIsAuth(false);
+          } else {
+            // Valid user data - set auth state
+            setIsAuth(true);
+          }
+        }
+      } catch (error) {
+        // Error parsing user data - clear auth state
+        console.error("Error validating user data:", error);
+        localStorage.setItem('isAuth', 'false');
+        localStorage.removeItem('user');
+        setIsAuth(false);
+      }
+    } else {
+      setIsAuth(false);
+    }
+    
+    setLoading(false);
+  }, []);
 
-  const login = user => {
-    localStorage.setItem('isAuth', 'true')
-    localStorage.setItem('user', JSON.stringify(user))
-    setIsAuth(true)
-  }
+  const login = (user) => {
+    // Validate user object has required fields
+    if (!user || !user.id) {
+      console.error("Invalid user object for login:", user);
+      return;
+    }
+    
+    localStorage.setItem('isAuth', 'true');
+    localStorage.setItem('user', JSON.stringify(user));    
+    setIsAuth(true);
+    console.log(user);
+  };
 
   const logout = () => {
-    localStorage.setItem('isAuth', 'false')
-    localStorage.removeItem('user')
-    setIsAuth(false)
-  }
+    localStorage.setItem('isAuth', 'false');
+    localStorage.removeItem('user');
+    setIsAuth(false);
+    navigate('/login');
+  };
 
   if (loading) {
-    return <div>Loading...</div>
+    return <div className="flex justify-center items-center h-screen">Loading...</div>;
   }
 
   return (
-    <div className='flex justify-center'>
+    <div className="flex justify-center">
       <Routes>
-        <Route
-          path='/'
-          element={isAuth ? <Navigate to='/dashboard' /> : <Home />}
-        />
-        <Route path='/login' element={<Login login={login} />} />
-        <Route path='/register' element={<Register login={login} />} />
-
+        <Route path="/" element={isAuth ? <Navigate to="/dashboard" /> : <Home />} />
+        <Route path="/login" element={isAuth ? <Navigate to="/dashboard" /> : <Login login={login} />} />
+        <Route path="/register" element={isAuth ? <Navigate to="/dashboard" /> : <Register login={login} />} />
         <Route element={<PrivateRoute isAuth={isAuth} />}>
-          <Route path='/dashboard' element={<HomePage />}>
+          <Route path="/dashboard" element={<HomePage />}>
             <Route index element={<Dashboard />} />
             <Route path='search' element={<SearchPage />} />
             <Route path='saved' element={<SavedPage />} />
@@ -63,14 +98,15 @@ function App() {
             <Route path='account' element={<AccountPage logout={logout} />} />
             <Route path='products/:id' element={<ProductDetail />} />
             <Route path='notifications' element={<NotificationScreen />} />
-            <Route path='address' element={<AddressPage />} />
-            <Route path='addaddress' element={<AddAddressPage />} />
-            <Route path='my-details' element={<Mydetails />} />
+            <Route path='address' element={<AddressPage/>} />
+            <Route path='addaddress' element={<AddAddressPage/>} />
           </Route>
         </Route>
+        {/* Add a catch-all route to handle invalid URLs */}
+        <Route path="*" element={<Navigate to={isAuth ? "/dashboard" : "/"} />} />
       </Routes>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;

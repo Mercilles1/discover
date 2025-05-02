@@ -91,6 +91,8 @@ function Live() {
       setFavoriteProducts(prevProducts => 
         prevProducts.filter(product => product.id !== productId)
       )
+      
+      alert('Removed from favorites!')
     } catch (error) {
       console.error('Error removing from favorites:', error)
       setError('Failed to remove from favorites')
