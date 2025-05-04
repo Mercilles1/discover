@@ -7,8 +7,9 @@ import correct from '../assets/Correct.svg'
 import google from '../assets/Google.svg'
 import facebook from '../assets/Facebook.svg'
 
-const Register = () => {
+const Register = ({ login }) => {
 	const [nameInput, setNameInput] = useState('')
+	const [randomId, setRandomId] = useState('')
 	const [passwordInput, setPasswordInput] = useState('')
 	const [emailInput, setEmailInput] = useState('')
 	const [eye, setEye] = useState(password1)
@@ -19,10 +20,18 @@ const Register = () => {
 	const [error, setError] = useState('')
 	const [users, setUsers] = useState([])
 	const [isLoading, setIsLoading] = useState(false)
+	const [isFetchingUsers, setIsFetchingUsers] = useState(false)
 	const navigate = useNavigate()
+
+	// Generate a random ID once on component mount
+	useEffect(() => {
+		const random = Math.round(Math.random() * 1000000000000000000000000)
+		setRandomId(random)
+	}, [])
 
 	useEffect(() => {
 		const fetchUsers = async () => {
+			setIsFetchingUsers(true)
 			try {
 				const response = await fetch(
 					'https://marsgoup-1.onrender.com/api/users'
@@ -35,9 +44,10 @@ const Register = () => {
 			} catch (err) {
 				setError('Failed to load user data. Please try again.')
 				console.error('Fetch error:', err)
+			} finally {
+				setIsFetchingUsers(false)
 			}
 		}
-
 		fetchUsers()
 	}, [])
 
@@ -48,63 +58,35 @@ const Register = () => {
 		}
 	}, [navigate])
 
-	const isDisabled = !(
-		nameInput?.trim() &&
-		emailInput?.trim() &&
-		passwordInput?.length > 3 &&
-		/^[^\s@]+@[^\s@]+\.[^\s@]+$/i.test(emailInput)
-	)
+	const isDisabled =
+		nameInput.trim().length < 2 ||
+		!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput) ||
+		passwordInput.length <= 3
 
 	const validateName = () => {
-		if (nameInput.trim() === '') {
-			setBorderName('border-[#E6E6E6]')
-			return
-		}
-		setBorderName(
-			nameInput.trim().length >= 2 ? 'border-[#0C9409]' : 'border-[#ED1010]'
-		)
+		const trimmed = nameInput.trim()
+		setBorderName(trimmed.length >= 2 ? 'border-[#0C9409]' : 'border-[#ED1010]')
 	}
 
 	const validatePassword = () => {
-		if (passwordInput.trim() === '') {
-			setBorderPassword('border-[#E6E6E6]')
-			return
-		}
 		setBorderPassword(
 			passwordInput.length > 3 ? 'border-[#0C9409]' : 'border-[#ED1010]'
 		)
 	}
 
 	const validateEmail = () => {
-		if (emailInput.trim() === '') {
-			setEmailStatus(null)
-			setBorderEmail('border-[#E6E6E6]')
-			return
-		}
-		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/i
-		setEmailStatus(emailRegex.test(emailInput) ? correct : mistake)
-		setBorderEmail(
-			emailRegex.test(emailInput) ? 'border-[#0C9409]' : 'border-[#ED1010]'
-		)
+		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+		const isValid = emailRegex.test(emailInput)
+		setEmailStatus(isValid ? correct : mistake)
+		setBorderEmail(isValid ? 'border-[#0C9409]' : 'border-[#ED1010]')
 	}
 
-	const handleNameChange = e => {
-		setNameInput(e.target.value)
-		validateName()
-	}
-
-	const handleEmailChange = e => {
-		setEmailInput(e.target.value)
-		validateEmail()
-	}
-
-	const handlePasswordChange = e => {
-		setPasswordInput(e.target.value)
-		validatePassword()
-	}
+	const handleNameChange = e => setNameInput(e.target.value)
+	const handleEmailChange = e => setEmailInput(e.target.value)
+	const handlePasswordChange = e => setPasswordInput(e.target.value)
 
 	const toggleEye = () => {
-		setEye(eye === password1 ? password2 : password1)
+		setEye(prev => (prev === password1 ? password2 : password1))
 	}
 
 	const handleRegister = async () => {
@@ -112,12 +94,21 @@ const Register = () => {
 		setIsLoading(true)
 
 		try {
-			const emailExists = users.some(user => user.email === emailInput)
-			if (emailExists) {
-				setError('Email already registered!')
-				return
+			// Creating the user data object to be sent
+			const userData = {
+				id: randomId,
+				fullname: nameInput,
+				gmail: emailInput,
+				password: passwordInput,
+				favoriteItems: [],
+				orders: [],
+				historyOfOrders: [],
+				creditCard: [],
+				locations: [],
+				notifications: [],
 			}
 
+			// Send registration request
 			const response = await fetch(
 				'https://marsgoup-1.onrender.com/api/users',
 				{
@@ -125,42 +116,30 @@ const Register = () => {
 					headers: {
 						'Content-Type': 'application/json',
 					},
-					body: JSON.stringify({
-						fullname: nameInput,
-						email: emailInput,
-						password: passwordInput,
-						favoriteItems: [],
-						orders: [],
-						historyOfOrders: [],
-						creditCard: '',
-						locations: [],
-						notifications: [],
-					}),
+					body: JSON.stringify(userData),
 				}
 			)
 
+			// Handle response
 			if (!response.ok) {
 				const errorData = await response.json()
-				throw new Error(
-					errorData.message ||
-						`Registration failed with status ${response.status}`
-				)
+				throw new Error(errorData.message || 'Registration failed')
 			}
 
-			const userData = await response.json()
-			if (!userData.id || !userData.fullname || !userData.email) {
-				throw new Error('Invalid user data received from server')
-			}
+			const createdUser = await response.json()
 
+			// Set user data in localStorage (properly stringified)
+			localStorage.setItem('user', JSON.stringify(createdUser))
+
+			// Set authentication status
 			localStorage.setItem('isAuth', 'true')
-			const userForStorage = {
-				id: userData.id,
-				fullname: userData.fullname,
-				email: userData.email,
-			}
-			localStorage.setItem('user', JSON.stringify(userForStorage))
 
-			navigate('/dashboard', { replace: true })
+			// Important: Use the login function passed as prop to set auth state in App
+			// This is the key change that allows auto-login after registration
+			login(createdUser)
+
+			// Navigate to dashboard on success
+			navigate('/dashboard')
 		} catch (err) {
 			setError(err.message || 'Registration failed. Please try again.')
 			console.error('Registration error:', err)
@@ -182,6 +161,7 @@ const Register = () => {
 			<div className='flex flex-col justify-between h-[100vh]'>
 				<div className='flex flex-col gap-[10px]'>
 					<div className='flex flex-col gap-[16px]'>
+						{/* Full Name */}
 						<div className='flex flex-col gap-[4px]'>
 							<p className='font-[Montserrat] font-[500] text-[#1a1a1a] text-[16px]'>
 								Full Name
@@ -199,6 +179,7 @@ const Register = () => {
 								/>
 							</div>
 						</div>
+						{/* Email */}
 						<div className='flex flex-col gap-[4px]'>
 							<p className='font-[Montserrat] font-[500] text-[#1a1a1a] text-[16px]'>
 								Email
@@ -223,6 +204,7 @@ const Register = () => {
 								)}
 							</div>
 						</div>
+						{/* Password */}
 						<div className='flex flex-col gap-[4px]'>
 							<p className='font-[Montserrat] font-[500] text-[#1a1a1a] text-[16px]'>
 								Password
@@ -238,15 +220,13 @@ const Register = () => {
 									onChange={handlePasswordChange}
 									onBlur={validatePassword}
 								/>
-								<div className='flex items-center gap-[8px]'>
-									<button onClick={toggleEye}>
-										<img
-											className='w-[20px]'
-											src={eye}
-											alt='Toggle password visibility'
-										/>
-									</button>
-								</div>
+								<button onClick={toggleEye}>
+									<img
+										className='w-[20px]'
+										src={eye}
+										alt='Toggle password visibility'
+									/>
+								</button>
 							</div>
 						</div>
 						{error && <p className='text-[#ED1010]'>{error}</p>}

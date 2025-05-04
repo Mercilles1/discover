@@ -13,6 +13,9 @@ const Mydetails = () => {
   });
   
   const [hasChanges, setHasChanges] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
   useEffect(() => {
     const userData = localStorage.getItem('user');
@@ -78,34 +81,146 @@ const Mydetails = () => {
     const updatedDetails = { ...userDetails, [name]: newValue };
     setUserDetails(updatedDetails);
     setHasChanges(true);
+    
+    // Clear any previous messages
+    setError('');
+    setSuccess('');
   };
   
-  const handleSubmit = () => {
-    const userData = localStorage.getItem('user');
+  const handleSubmit = async () => {
+    setIsLoading(true);
+    setError('');
+    setSuccess('');
     
-    if (userData) {
-      const userObj = JSON.parse(userData);
+    try {
+      const userData = localStorage.getItem('user');
       
-      userObj.fullname = userDetails.fullname;
-      userObj.gmail = userDetails.email;
-      userObj.dateOfBirth = userDetails.dateOfBirth;
-      userObj.gender = userDetails.gender;
-      userObj.phoneNumber = userDetails.phoneNumber;
+      if (userData) {
+        const userObj = JSON.parse(userData);
+        
+        // Track if we have changes to send to API
+        const hasApiChanges = userObj.fullname !== userDetails.fullname || 
+                             userObj.gmail !== userDetails.email;
+        
+        // Update localStorage with all changes
+        const updatedUser = {
+          ...userObj,
+          fullname: userDetails.fullname,
+          gmail: userDetails.email,
+          dateOfBirth: userDetails.dateOfBirth,
+          gender: userDetails.gender,
+          phoneNumber: userDetails.phoneNumber
+        };
+        
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        
+        // If fullname or email has changed, update the API
+        if (hasApiChanges) {
+          await updateUserInAPI(updatedUser);
+        } else {
+          console.log("No API changes needed, only updated localStorage");
+          setSuccess("Details updated successfully");
+        }
+        
+        setHasChanges(false);
+      } else {
+        // Create new user in localStorage
+        const newUser = {
+          fullname: userDetails.fullname,
+          gmail: userDetails.email,
+          dateOfBirth: userDetails.dateOfBirth,
+          gender: userDetails.gender,
+          phoneNumber: userDetails.phoneNumber
+        };
+        
+        localStorage.setItem('user', JSON.stringify(newUser));
+        setSuccess("Details saved successfully");
+        setHasChanges(false);
+      }
+    } catch (err) {
+      console.error("Error updating user details:", err);
+      setError("Failed to update details. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  // Function to update user data in API
+  const updateUserInAPI = async (userData) => {
+    // Get user ID for API call - use regular id, not _id
+    const userId = userData.id;
+    
+    if (!userId) {
+      console.error("No user ID found for API update");
+      throw new Error("User ID not found");
+    }
+    
+    console.log("Updating user in API with ID:", userId);
+    
+    // First, try to fetch all users to get complete user data
+    try {
+      const response = await fetch('https://marsgoup-1.onrender.com/api/users');
       
-      localStorage.setItem('user', JSON.stringify(userObj));
-      
-      setHasChanges(false);
-    } else {
-      const newUser = {
-        fullname: userDetails.fullname,
-        gmail: userDetails.email,
-        dateOfBirth: userDetails.dateOfBirth,
-        gender: userDetails.gender,
-        phoneNumber: userDetails.phoneNumber
-      };
-      
-      localStorage.setItem('user', JSON.stringify(newUser));
-      setHasChanges(false);
+      if (response.ok) {
+        const allUsers = await response.json();
+        
+        // Find the user by regular id only
+        const apiUser = allUsers.find(user => user.id === userId);
+        
+        if (apiUser) {
+          console.log("Found user in API:", apiUser);
+          
+          // Prepare data for API update - only updating fullname and gmail
+          const apiUpdateData = {
+            ...apiUser, // Start with complete API data
+            fullname: userData.fullname,
+            gmail: userData.email
+          };
+          
+          // Make PUT request to update API using regular id
+          const updateResponse = await fetch(`https://marsgoup-1.onrender.com/api/users/${userId}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(apiUpdateData)
+          });
+          
+          if (updateResponse.ok) {
+            console.log("API update successful");
+            setSuccess("Details updated successfully");
+          } else {
+            console.log("API update failed, trying POST");
+            
+            // Try POST as fallback
+            const postResponse = await fetch(`https://marsgoup-1.onrender.com/api/users/${userId}`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(apiUpdateData)
+            });
+            
+            if (postResponse.ok) {
+              console.log("API update successful (POST)");
+              setSuccess("Details updated successfully");
+            } else {
+              throw new Error("Failed to update API");
+            }
+          }
+        } else {
+          console.log("User not found in API data using id:", userId);
+          throw new Error("User not found in API");
+        }
+      } else {
+        console.error("Failed to fetch users from API");
+        throw new Error("Failed to fetch users from API");
+      }
+    } catch (error) {
+      console.error("Error updating API:", error);
+      // We'll still consider it a partial success since localStorage was updated
+      setSuccess("Details saved locally, but couldn't update online profile");
+      // Don't rethrow - we want to consider the local update a partial success
     }
   };
 
@@ -118,9 +233,23 @@ const Mydetails = () => {
       </div>
       <hr className='bg-[#E6E6E6] text-[#E6E6E6] mt-[24px] h-[1.5px]' />
 
+      {error && (
+        <div className="mt-4 p-2 bg-red-100 text-red-700 rounded">
+          {error}
+        </div>
+      )}
+      
+      {success && (
+        <div className="mt-4 p-2 bg-green-100 text-green-700 rounded">
+          {success}
+        </div>
+      )}
+
       <div className='flex flex-col gap-[16px] mt-[24px]'>
         <div className='flex flex-col gap-[4px]'>
-          <p className='font-[general sans] font-medium text-[16px] text-[#1A1A1A]'>Full Name</p>
+          <p className='font-[general sans] font-medium text-[16px] text-[#1A1A1A]'>
+            Full Name <span className="text-xs text-gray-500">(syncs with account)</span>
+          </p>
           <input 
             className='w-[341px] h-[52px] border-[1px] border-[#E6E6E6] rounded-[10px] px-3' 
             type="text" 
@@ -131,7 +260,9 @@ const Mydetails = () => {
           />
         </div>
         <div className='flex flex-col gap-[4px]'>
-          <p className='font-[general sans] font-medium text-[16px] text-[#1A1A1A]'>Email Address</p>
+          <p className='font-[general sans] font-medium text-[16px] text-[#1A1A1A]'>
+            Email Address <span className="text-xs text-gray-500">(syncs with account)</span>
+          </p>
           <input 
             className='w-[341px] h-[52px] border-[1px] border-[#E6E6E6] rounded-[10px] px-3' 
             type="email" 
@@ -142,7 +273,9 @@ const Mydetails = () => {
           />
         </div>
         <div className='flex flex-col gap-[4px]'>
-          <p className='font-[general sans] font-medium text-[16px] text-[#1A1A1A]'>Date of Birth</p>
+          <p className='font-[general sans] font-medium text-[16px] text-[#1A1A1A]'>
+            Date of Birth <span className="text-xs text-gray-500">(stored locally)</span>
+          </p>
           <input 
             className='w-[341px] h-[52px] border-[1px] border-[#E6E6E6] rounded-[10px] px-3' 
             type="date" 
@@ -153,7 +286,9 @@ const Mydetails = () => {
           />
         </div>
         <div className='flex flex-col gap-[4px]'>
-          <p className='font-[general sans] font-medium text-[16px] text-[#1A1A1A]'>Gender</p>
+          <p className='font-[general sans] font-medium text-[16px] text-[#1A1A1A]'>
+            Gender <span className="text-xs text-gray-500">(stored locally)</span>
+          </p>
           <select
             className='w-[341px] h-[52px] border-[1px] border-[#E6E6E6] rounded-[10px] px-3'
             name="gender"
@@ -167,7 +302,9 @@ const Mydetails = () => {
           </select>
         </div>
         <div className='flex flex-col gap-[4px]'>
-          <p className='font-[general sans] font-medium text-[16px] text-[#1A1A1A]'>Phone Number</p>
+          <p className='font-[general sans] font-medium text-[16px] text-[#1A1A1A]'>
+            Phone Number <span className="text-xs text-gray-500">(stored locally)</span>
+          </p>
           <input 
             className='w-[341px] h-[52px] border-[1px] border-[#E6E6E6] rounded-[10px] px-3' 
             type="tel" 
@@ -182,11 +319,11 @@ const Mydetails = () => {
       </div>
 
       <button 
-        className='w-[341px] h-[54px] bg-[#1A1A1A] text-white font-[general sans] font-medium text-[16px] rounded-[10px] mt-[40px]'
+        className={`w-[341px] h-[54px] ${isLoading || !hasChanges ? 'bg-gray-400' : 'bg-[#1A1A1A]'} text-white font-[general sans] font-medium text-[16px] rounded-[10px] mt-[40px]`}
         onClick={handleSubmit}
-        disabled={!hasChanges}
+        disabled={isLoading || !hasChanges}
       >
-        Submit
+        {isLoading ? 'Saving...' : 'Submit'}
       </button>
     </div>
   )

@@ -34,8 +34,18 @@ const Newcard = () => {
     }
 
     const [month, year] = expiryDate.split('/');
+    const currentYear = new Date().getFullYear() % 100; // Get last 2 digits of year
+    const currentMonth = new Date().getMonth() + 1; // Months are 0-indexed
+    
     if (!month || !year || parseInt(month) > 12 || parseInt(month) < 1) {
       setError('Invalid expiry date');
+      return false;
+    }
+    
+    // Check if card is expired
+    if ((parseInt(year) < currentYear) || 
+        (parseInt(year) === currentYear && parseInt(month) < currentMonth)) {
+      setError('Card has expired');
       return false;
     }
 
@@ -52,42 +62,144 @@ const Newcard = () => {
     if (!validateCard()) return;
 
     setIsSubmitting(true);
-
-    const card = {
-      number: cardNumber.replace(/\s/g, ''),
-      expiry: expiryDate,
-      cvc: securityCode,
-      img: 'https://upload.wikimedia.org/wikipedia/commons/0/04/Visa.svg'
-    };
+    setError('');
 
     try {
-      const user = JSON.parse(localStorage.getItem('user'));
-      if (!user || !user._id) {
+      // Get user from localStorage but only for identification purposes
+      const currentUser = JSON.parse(localStorage.getItem('user'));
+      if (!currentUser) {
         throw new Error('User not found in local storage');
       }
 
-      const userId = user._id;
-
-      const response = await fetch(`https://marsgoup-1.onrender.com/api/users/${userId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ creditCard: JSON.stringify(card) }) // 👈 stringify the card object
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update card');
+      // Get regular id (not _id)
+      const userId = currentUser.id;
+      if (!userId) {
+        throw new Error('User ID not found');
       }
-
+      
+      console.log("Using user ID for API request:", userId);
+      
+      // Create card object
+      const cardObject = {
+        id: Date.now(),
+        number: cardNumber,
+        date: expiryDate,
+        cvc: securityCode,
+        img: 'https://upload.wikimedia.org/wikipedia/commons/0/04/Visa.svg'
+      };
+      
+      // First, fetch all users to find our user
+      const allUsersResponse = await fetch('https://marsgoup-1.onrender.com/api/users');
+      
+      if (!allUsersResponse.ok) {
+        throw new Error(`Failed to fetch users: ${allUsersResponse.status}`);
+      }
+      
+      const allUsers = await allUsersResponse.json();
+      console.log("Found total users:", allUsers.length);
+      
+      // Find our user by id
+      const userData = allUsers.find(user => user.id === userId);
+      
+      if (!userData) {
+        throw new Error('User not found in API');
+      }
+      
+      console.log("Retrieved current user data from API:", userData);
+      
+      // Prepare updated user data
+      // Ensure we keep ALL existing fields from the API
+      const updatedUserData = {
+        ...userData,
+        creditCard: Array.isArray(userData.creditCard) 
+          ? [...userData.creditCard, cardObject] 
+          : [cardObject]
+      };
+      
+      console.log("Updating user with data:", updatedUserData);
+      
+      // Update the user with PUT
+      console.log("Updating user with data:", updatedUserData);
+      
+      // Try to update with PUT first
+      let updateSuccessful = false;
+      let finalUserData = null;
+      
+      try {
+        const updateResponse = await fetch(`https://marsgoup-1.onrender.com/api/users/${userId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(updatedUserData)
+        });
+        
+        if (updateResponse.ok) {
+          updateSuccessful = true;
+          console.log("PUT update successful");
+          
+          // Fetch all users again to get the updated user
+          const usersResponse = await fetch('https://marsgoup-1.onrender.com/api/users');
+          const allUsers = await usersResponse.json();
+          finalUserData = allUsers.find(user => user.id === userId);
+        } else {
+          console.log("PUT update failed, status:", updateResponse.status);
+        }
+      } catch (err) {
+        console.error("Error performing PUT:", err);
+      }
+      
+      // If PUT fails, try POST
+      if (!updateSuccessful) {
+        try {
+          console.log("Trying POST update instead");
+          const postResponse = await fetch(`https://marsgoup-1.onrender.com/api/users/${userId}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(updatedUserData)
+          });
+          
+          if (postResponse.ok) {
+            updateSuccessful = true;
+            console.log("POST update successful");
+            
+            // Fetch all users again to get the updated user
+            const usersResponse = await fetch('https://marsgoup-1.onrender.com/api/users');
+            const allUsers = await usersResponse.json();
+            finalUserData = allUsers.find(user => user.id === userId);
+          } else {
+            throw new Error(`Failed to update user with POST: ${postResponse.status}`);
+          }
+        } catch (err) {
+          console.error("Error performing POST:", err);
+          throw err;
+        }
+      }
+      
+      if (!finalUserData) {
+        throw new Error("Could not retrieve updated user data after update");
+      }
+      
+      // Create a copy without credit card information for localStorage
+      const userForLocalStorage = {
+        ...finalUserData,
+        creditCard: [] // Empty the credit card array for localStorage
+      };
+      
+      localStorage.setItem('user', JSON.stringify(userForLocalStorage));
+      console.log("Updated localStorage with user (without credit cards):", userForLocalStorage);
+      
       setShowCongrats(true);
+      
     } catch (err) {
-      console.error('Fetch error:', err);
+      console.error('Error adding card:', err);
       setError(err.message || 'Failed to add card. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
   };
-
 
   return (
     <div className='mt-[12px] px-[24px] relative'>

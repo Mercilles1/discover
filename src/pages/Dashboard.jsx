@@ -8,6 +8,17 @@ import favourite from '../assets/favourite.png'
 import plusCart from '../assets/plusCart.png'
 import FilterModal from '../components/FilterModal'
 
+const ProductSkeleton = () => (
+  <div className='card relative flex flex-col justify-start animate-pulse'>
+    <div className='w-[150px] h-[150px] bg-gray-200 rounded'></div>
+    <div className='mt-[8px] mb-[3px] w-[100px] h-[16px] bg-gray-200 rounded'></div>
+    <div className='w-[60px] h-[12px] bg-gray-200 rounded'></div>
+    <div className='mt-[4px] w-[40px] h-[10px] bg-gray-200 rounded'></div>
+    <div className='absolute rounded-[8px] right-[12px] top-[12px] w-[32px] h-[32px] bg-gray-200'></div>
+    <div className='absolute right-[8px] bottom-0 w-[24px] h-[24px] bg-gray-200 rounded-full'></div>
+  </div>
+)
+
 function Dashboard() {
   const [products, setProducts] = useState([])
   const [filteredProducts, setFilteredProducts] = useState([])
@@ -84,7 +95,56 @@ function Dashboard() {
 
   if (loading) {
     return (
-      <div className='w-[390px] px-[24px] pt-[12px] text-center'>Loading products...</div>
+      <div className='w-[390px] px-[24px] pt-[12px]'>
+        <div className='flex justify-between items-center'>
+          <h1 className='text-[32px] font-[600] text-[#1A1A1A]'>Discover</h1>
+          <NavLink to='/dashboard/notifications' className='mt-[6px]'>
+            <img className='w-[24px] h-[27px]' src={bell} alt='Notifications' />
+          </NavLink>
+        </div>
+
+        <form onSubmit={handleSearchSubmit} className='flex justify-between mt-[16px] items-center'>
+          <div className='flex justify-center items-center px-[20px] py-[14px] rounded-[10px] border-[1px] border-[#E6E6E6]'>
+            <img className='mr-[12px]' src={lupa} alt='Search' />
+            <input
+              className='w-[181px] h-[22px] outline-none text-[16px] font-[400] placeholder:text-[#999999]'
+              placeholder='Search for clothes...'
+              type='text'
+              value={searchText}
+              onChange={handleSearchChange}
+            />
+            <img src={micro} alt='Microphone' />
+          </div>
+          <button
+            type="submit"
+            className='w-[52px] h-[52px] bg-[#1A1A1A] flex justify-center items-center rounded-[10px]'
+            onClick={() => setShowFilter(true)}
+          >
+            <img src={filter} alt='Filter' />
+          </button>
+        </form>
+
+        <div className='sort mt-[16px] flex justify-center items-center gap-[8px]'>
+          {categories.map((category) => (
+            <button
+              key={category}
+              onClick={() => handleCategoryClick(category)}
+              className={`px-[20px] py-[7px] border-[1px] border-[#E6E6E6] flex justify-center items-center rounded-[10px] whitespace-nowrap transition-all duration-200 ${activeCategory === category
+                ? 'bg-black text-white'
+                : 'bg-white text-black hover:bg-black hover:text-white'
+                }`}
+            >
+              {category}
+            </button>
+          ))}
+        </div>
+
+        <div className='cards mb-[100px] mt-[24px] flex justify-center items-center flex-wrap gap-[19px]'>
+          {[...Array(6)].map((_, index) => (
+            <ProductSkeleton key={index} />
+          ))}
+        </div>
+      </div>
     )
   }
 
@@ -131,8 +191,8 @@ function Dashboard() {
             key={category}
             onClick={() => handleCategoryClick(category)}
             className={`px-[20px] py-[7px] border-[1px] border-[#E6E6E6] flex justify-center items-center rounded-[10px] whitespace-nowrap transition-all duration-200 ${activeCategory === category
-                ? 'bg-black text-white'
-                : 'bg-white text-black hover:bg-black hover:text-white'
+              ? 'bg-black text-white'
+              : 'bg-white text-black hover:bg-black hover:text-white'
               }`}
           >
             {category}
@@ -147,42 +207,39 @@ function Dashboard() {
       ) : (
         <div className='cards mb-[100px] mt-[24px] flex justify-center items-center flex-wrap gap-[19px]'>
           {filteredProducts.map(product => (
-            <NavLink to={`/dashboard/products/${product.id}`}><div
-              key={product.id}
-              className='card relative flex flex-col justify-start'
-            >
-              <img
-                src={product.img || 'https://via.placeholder.com/150'}
-                alt={product.title}
-                className='w-[150px] h-[150px] object-cover'
-              />
-              <h2 className='mt-[8px] mb-[3px] text-[16px] font-[600]'>
-                {product.title}
-              </h2>
-              <p className='text-[12px] font-[500] text-[#808080]'>
-                $ {product.price}
-              </p>
-              <p className='text-[10px] font-[400] text-gray-400'>{product.categories}</p>
-              <button>
+            <NavLink to={`/dashboard/products/${product.id}`} key={product.id}>
+              <div
+                className='card relative flex flex-col justify-start'
+              >
                 <img
-                  className='absolute rounded-[8px] right-[12px] top-[12px] bg-white p-[8px]'
-                  src={favourite}
-                  alt='Add to favorites'
+                  src={product.img || 'https://via.placeholder.com/150'}
+                  alt={product.title}
+                  className='w-[150px] h-[150px] object-cover'
                 />
-              </button>
-              <button className='p-[4px] absolute right-[8px] bottom-0 h-[24px] bg-gray-300 rounded-full flex justify-center items-center'>
-                <img className='w-[18px] h-[18px]' src={plusCart} alt='Add to cart' />
-              </button>
-            </div></NavLink>
-
+                <h2 className='mt-[8px] mb-[3px] text-[16px] font-[600]'>
+                  {product.title}
+                </h2>
+                <p className='text-[12px] font-[500] text-[#808080]'>
+                  $ {product.price}
+                </p>
+                <p className='text-[10px] font-[400] text-gray-400'>{product.categories}</p>
+                <button>
+                  <img
+                    className='absolute rounded-[8px] right-[12px] top-[12px] bg-white p-[8px]'
+                    src={favourite}
+                    alt='Add to favorites'
+                  />
+                </button>
+                <button className='p-[4px] absolute right-[8px] bottom-0 h-[24px] bg-gray-300 rounded-full flex justify-center items-center'>
+                  <img className='w-[18px] h-[18px]' src={plusCart} alt='Add to cart' />
+                </button>
+              </div>
+            </NavLink>
           ))}
         </div>
       )}
 
-      {/* Модальное окно фильтров */}
       <FilterModal isOpen={showFilter} onClose={() => setShowFilter(false)} />
-
-
     </div>
   )
 }
