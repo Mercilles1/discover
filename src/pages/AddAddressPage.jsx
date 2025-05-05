@@ -14,7 +14,9 @@ function AddAddressPage() {
     const [isEditing, setIsEditing] = useState(false);
     const [editingAddressId, setEditingAddressId] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
-    const [userId, setUserId] = useState("1"); // Set default userId to "1" directly
+    const [error, setError] = useState(null);
+    const [userId, setUserId] = useState(null);
+    const [currentCoords, setCurrentCoords] = useState(null);
     const mapRef = useRef(null);
     const formRef = useRef(null);
     const containerRef = useRef(null);
@@ -22,6 +24,8 @@ function AddAddressPage() {
     
     // Constants
     const API_BASE_URL = 'https://marsgoup-1.onrender.com/api';
+    // Default Tashkent coordinates
+    const DEFAULT_COORDS = [41.2995, 69.2401];
 
     // Список махаллей (районов)
     const neighborhoods = [
@@ -39,27 +43,147 @@ function AddAddressPage() {
         'Яшнабадский'
     ];
 
+    // Coordinates validation functions embedded directly
+    const validateCoordinates = (coords) => {
+        // Coordinates must be an array
+        if (!Array.isArray(coords)) {
+            console.error('Coordinates are not an array:', coords);
+            return false;
+        }
+        // Coordinates must have exactly 2 elements
+        if (coords.length !== 2) {
+            console.error('Coordinates don\'t have exactly 2 elements:', coords);
+            return false;
+        }
+        // Both elements must be numbers
+        if (typeof coords[0] !== 'number' || typeof coords[1] !== 'number') {
+            console.error('Coordinates contain non-numeric values:', coords);
+            return false;
+        }
+        // Latitude must be between -90 and 90
+        if (coords[0] < -90 || coords[0] > 90) {
+            console.error('Latitude out of range:', coords[0]);
+            return false;
+        }
+        // Longitude must be between -180 and 180
+        if (coords[1] < -180 || coords[1] > 180) {
+            console.error('Longitude out of range:', coords[1]);
+            return false;
+        }
+        return true;
+    };
+
+    // Parse coordinates safely
+    const parseCoordinates = (coordsData) => {
+        try {
+            // If it's already an array, just validate it
+            if (Array.isArray(coordsData)) {
+                if (validateCoordinates(coordsData)) {
+                    return coordsData;
+                } else {
+                    return DEFAULT_COORDS; // Default coordinates
+                }
+            }
+            // If it's a string, try to parse it
+            if (typeof coordsData === 'string') {
+                try {
+                    const parsed = JSON.parse(coordsData);
+                    if (validateCoordinates(parsed)) {
+                        return parsed;
+                    }
+                } catch (e) {
+                    console.error('Error parsing coordinates string:', e);
+                }
+            }
+            // Default fallback
+            return DEFAULT_COORDS;
+        } catch (error) {
+            console.error('Error processing coordinates:', error);
+            return DEFAULT_COORDS;
+        }
+    };
+
+    // Function to log address data for debugging
+    const debugAddressData = (addr) => {
+        console.group('Address Data:');
+        console.log('ID:', addr.id);
+        console.log('Nickname:', addr.nickname);
+        console.log('Full Address:', addr.fullAddress);
+        console.log('Neighborhood:', addr.neighborhood);
+        console.log('Coordinates:', addr.coords);
+        console.log('Coordinates Valid:', validateCoordinates(addr.coords));
+        console.groupEnd();
+    };
+
+    // Function to get user ID from localStorage with any format
+    const getUserIdFromStorage = () => {
+        try {
+            const userString = localStorage.getItem('user');
+            if (!userString) {
+                console.warn('No user found in localStorage');
+                return null;
+            }
+
+            const user = JSON.parse(userString);
+            console.log('User data from localStorage:', user);
+
+            // Only use scientific notation id field
+            if (user.id) {
+                console.log('Using scientific notation id:', user.id);
+                return user.id;
+            } else {
+                console.warn('No id field found in user object');
+                return null;
+            }
+        } catch (error) {
+            console.error('Error getting user ID from localStorage:', error);
+            return null;
+        }
+    };
+
     useEffect(() => {
-        // Проверяем, редактируем ли существующий адрес
+        // Get the user ID - only use scientific notation ID
+        const storedUserId = getUserIdFromStorage();
+        if (storedUserId) {
+            setUserId(storedUserId);
+        } else {
+            console.error('Scientific notation ID not found. Please log in again.');
+            alert('User information not found. Please log in again.');
+            navigate('/login');
+            return;
+        }
+
+        // Check if we're editing an existing address
         const editingAddress = localStorage.getItem('editingAddress');
         if (editingAddress) {
             try {
                 const parsedAddress = JSON.parse(editingAddress);
                 if (parsedAddress) {
+                    console.log('Editing existing address:', parsedAddress);
                     setIsEditing(true);
                     setEditingAddressId(parsedAddress.id);
                     setAddress(parsedAddress.fullAddress || '');
                     setNickname(parsedAddress.nickname || 'home');
                     setSelectedNeighborhood(parsedAddress.neighborhood || 'Выберите махаллю');
                     
-                    localStorage.removeItem('editingAddress'); // Очищаем после загрузки
+                    // Parse and set coordinates if available
+                    if (parsedAddress.coords) {
+                        const parsedCoords = parseCoordinates(parsedAddress.coords);
+                        console.log('Parsed coordinates for editing:', parsedCoords);
+                        setCurrentCoords(parsedCoords);
+                    }
+                    
+                    // Debug the address
+                    debugAddressData(parsedAddress);
+                    
+                    localStorage.removeItem('editingAddress'); // Clear after loading
                 }
             } catch (error) {
                 console.error('Error parsing editing address:', error);
             }
         }
 
-        // Загружаем Яндекс Карты API только один раз
+        // Load Yandex Maps API if not already loaded
         if (!window.ymaps) {
             const loadYandexMaps = () => {
                 const script = document.createElement('script');
@@ -73,7 +197,7 @@ function AddAddressPage() {
             initMap();
         }
 
-        // Добавляем слушатель для закрытия формы при клике вне неё
+        // Add click outside listener
         const handleClickOutside = (event) => {
             if (formRef.current && !formRef.current.contains(event.target) && 
                 mapRef.current && !mapRef.current.contains(event.target)) {
@@ -83,12 +207,21 @@ function AddAddressPage() {
 
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
+    }, [navigate]);
 
-    // Обновляем размер карты при изменении состояния формы
+    // Update map size when form expands/collapses
     useEffect(() => {
         updateMapSize();
     }, [isFormExpanded]);
+
+    // Update map when currentCoords changes
+    useEffect(() => {
+        if (mapInstance && marker && currentCoords && validateCoordinates(currentCoords)) {
+            console.log('Setting marker to coordinates:', currentCoords);
+            marker.geometry.setCoordinates(currentCoords);
+            mapInstance.setCenter(currentCoords, 16);
+        }
+    }, [mapInstance, marker, currentCoords]);
 
     // Функция обновления размера карты
     const updateMapSize = () => {
@@ -109,71 +242,87 @@ function AddAddressPage() {
             window.ymaps.ready(() => {
                 // Проверяем, инициализирована ли уже карта
                 if (mapRef.current && !mapRef.current.querySelector('.ymaps-2-1-79-map')) {
-                    // Центр Ташкента или координаты редактируемого адреса
-                    const tashkentCoords = [41.2995, 69.2401];
+                    console.log('Initializing Yandex Map');
                     
-                    // Получаем координаты редактируемого адреса, если они есть
-                    let initialCoords = tashkentCoords;
-                    const editingAddress = localStorage.getItem('editingAddress');
-                    if (editingAddress) {
-                        try {
-                            const parsedAddress = JSON.parse(editingAddress);
-                            if (parsedAddress && parsedAddress.coords) {
-                                initialCoords = parsedAddress.coords;
-                            }
-                        } catch (error) {
-                            console.error('Error parsing editing address coordinates:', error);
-                        }
+                    // Determine initial coordinates
+                    let initialCoords;
+                    
+                    // If we have current coordinates (from editing), use those
+                    if (currentCoords && validateCoordinates(currentCoords)) {
+                        initialCoords = currentCoords;
+                        console.log('Using existing coordinates for map initialization:', initialCoords);
+                    } else {
+                        // Otherwise use default Tashkent coordinates
+                        initialCoords = DEFAULT_COORDS;
+                        console.log('Using default coordinates for map initialization:', initialCoords);
                     }
                     
                     const map = new window.ymaps.Map('map', {
                         center: initialCoords,
-                        zoom: 15, // Устанавливаем больший зум для режима редактирования
+                        zoom: 15,
                         controls: ['zoomControl', 'searchControl']
                     });
 
-                    // Создаем маркер
+                    // Create marker
                     const newMarker = new window.ymaps.Placemark(initialCoords, {
                         hintContent: 'Выберите адрес'
                     }, {
                         draggable: true
                     });
 
-                    // Обработчик перетаскивания маркера
+                    // Marker drag handler
                     newMarker.events.add('dragend', function () {
                         const coords = newMarker.geometry.getCoordinates();
-                        updateAddressByCoords(coords);
+                        console.log('Marker dragged to coordinates:', coords);
+                        if (validateCoordinates(coords)) {
+                            setCurrentCoords(coords);
+                            updateAddressByCoords(coords);
+                        } else {
+                            console.error('Invalid coordinates from marker drag:', coords);
+                        }
                     });
 
-                    // Обработчик клика по карте
+                    // Map click handler
                     map.events.add('click', function (e) {
                         const coords = e.get('coords');
-                        newMarker.geometry.setCoordinates(coords);
-                        updateAddressByCoords(coords);
-                        expandForm(true);
+                        console.log('Map clicked at coordinates:', coords);
+                        if (validateCoordinates(coords)) {
+                            newMarker.geometry.setCoordinates(coords);
+                            setCurrentCoords(coords);
+                            updateAddressByCoords(coords);
+                            expandForm(true);
+                        } else {
+                            console.error('Invalid coordinates from map click:', coords);
+                        }
                     });
 
                     map.geoObjects.add(newMarker);
                     setMapInstance(map);
                     setMarker(newMarker);
 
-                    // Создаем поисковый контрол
+                    // Set up search control
                     const searchControl = map.controls.get('searchControl');
                     searchControl.events.add('resultselect', function (e) {
                         const results = searchControl.getResultsArray();
                         const selected = searchControl.getSelectedIndex();
                         const coords = results[selected].geometry.getCoordinates();
+                        console.log('Search result selected with coordinates:', coords);
                         
-                        newMarker.geometry.setCoordinates(coords);
-                        
-                        // Получаем адрес и устанавливаем в поле
-                        results[selected].getAddress().then((address) => {
-                            setAddress(address);
-                            expandForm(true);
-                        });
+                        if (validateCoordinates(coords)) {
+                            newMarker.geometry.setCoordinates(coords);
+                            setCurrentCoords(coords);
+                            
+                            // Get address from search result
+                            results[selected].getAddress().then((address) => {
+                                setAddress(address);
+                                expandForm(true);
+                            });
+                        } else {
+                            console.error('Invalid coordinates from search result:', coords);
+                        }
                     });
 
-                    // Если это режим редактирования, расширяем форму
+                    // Expand form if editing
                     if (isEditing) {
                         expandForm(true);
                     }
@@ -182,9 +331,9 @@ function AddAddressPage() {
         }
     };
 
-    // Получаем адрес по координатам
+    // Get address from coordinates
     const updateAddressByCoords = (coords) => {
-        if (window.ymaps) {
+        if (window.ymaps && validateCoordinates(coords)) {
             window.ymaps.geocode(coords).then(res => {
                 const firstResult = res.geoObjects.get(0);
                 if (firstResult) {
@@ -195,15 +344,22 @@ function AddAddressPage() {
         }
     };
 
-    // Поиск координат по адресу
+    // Search for coordinates by address
     const searchByAddress = () => {
         if (mapInstance && address) {
             window.ymaps.geocode(address).then(res => {
                 const firstResult = res.geoObjects.get(0);
                 if (firstResult) {
                     const coords = firstResult.geometry.getCoordinates();
-                    marker.geometry.setCoordinates(coords);
-                    mapInstance.setCenter(coords, 16);
+                    console.log('Found coordinates for address:', coords);
+                    
+                    if (validateCoordinates(coords)) {
+                        marker.geometry.setCoordinates(coords);
+                        mapInstance.setCenter(coords, 16);
+                        setCurrentCoords(coords);
+                    } else {
+                        console.error('Invalid coordinates from geocode result:', coords);
+                    }
                 }
             });
         }
@@ -232,59 +388,134 @@ function AddAddressPage() {
         navigate('/dashboard/address');
     };
 
-    // Сохранение или обновление адреса
+    // Save or update address
     const handleSaveAddress = async () => {
-        // Создаем объект адреса с указанием пользователя
+        if (!userId) {
+            alert('User ID not found. Please log in again.');
+            navigate('/login');
+            return;
+        }
+
+        // Reset error
+        setError(null);
+        
+        // Validate form
+        if (!address || address.trim() === '') {
+            setError('Please enter a valid address');
+            return;
+        }
+        
+        if (selectedNeighborhood === 'Выберите махаллю') {
+            setError('Please select a neighborhood');
+            return;
+        }
+
+        // Validate coordinates
+        if (!currentCoords || !validateCoordinates(currentCoords)) {
+            setError('Please select a location on the map');
+            return;
+        }
+
+        // Start loading
+        setIsLoading(true);
+
+        // Get user from localStorage to ensure we have full user data
+        let userData;
+        try {
+            // Try to get the user data directly from localStorage first
+            const userString = localStorage.getItem('user');
+            if (userString) {
+                userData = JSON.parse(userString);
+                console.log('Using user data from localStorage:', userData);
+            }
+        } catch (error) {
+            console.error('Error getting user data from localStorage:', error);
+        }
+
+        // If we couldn't get from localStorage, try to fetch from API
+        if (!userData) {
+            try {
+                // Use the raw ID string directly in the URL without any processing
+                // This preserves the exact scientific notation format including the decimal point
+                console.log(`Attempting to fetch user with exact ID: "${userId}"`);
+                
+                // Encode the ID properly for URL
+                const encodedId = encodeURIComponent(userId);
+                const apiUrl = `${API_BASE_URL}/users/${encodedId}`;
+                console.log('API URL:', apiUrl);
+                
+                const response = await fetch(apiUrl);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error(`Error response: ${response.status} - ${errorText}`);
+                    throw new Error(`User not found. Status: ${response.status}`);
+                }
+                
+                userData = await response.json();
+                console.log('Successfully retrieved user data from API:', userData);
+            } catch (error) {
+                console.error('Error fetching user data:', error);
+                setError(`Failed to fetch user data: ${error.message}`);
+                setIsLoading(false);
+                return;
+            }
+        }
+        
+        // Create a copy of the locations array or initialize it if empty
+        const updatedLocations = Array.isArray(userData.locations) 
+            ? [...userData.locations] 
+            : [];
+        
+        // Create the address object with properly formatted coordinates
         const addressData = {
             id: isEditing ? editingAddressId : Date.now(),
             nickname: nickname,
             fullAddress: address,
             neighborhood: selectedNeighborhood,
-            coords: marker ? marker.geometry.getCoordinates() : null,
-            userId: userId // Use the fixed userId "1"
+            coords: currentCoords,  // Store the coordinates as a direct array
+            userId: userId // Use the original scientific notation ID here
         };
         
-        // Now save directly to API
-        try {
-            setIsLoading(true);
+        // Log the coordinates to verify they're being captured correctly
+        console.log('Map coordinates being saved:', addressData.coords);
+        console.log('Coordinates valid:', validateCoordinates(addressData.coords));
+        
+        // Debug the complete address data
+        debugAddressData(addressData);
+        
+        // Update or add the address
+        if (isEditing) {
+            const locationIndex = updatedLocations.findIndex(loc => 
+                loc.id === editingAddressId
+            );
             
-            // Fetch current user data from API
-            const response = await fetch(`${API_BASE_URL}/users/${userId}`);
-            
-            if (!response.ok) {
-                throw new Error(`Error fetching user data: ${response.status}`);
-            }
-            
-            const userData = await response.json();
-            
-            // Create a copy of the locations array or initialize it if empty
-            const updatedLocations = Array.isArray(userData.locations) 
-                ? [...userData.locations] 
-                : [];
-            
-            if (isEditing) {
-                // Находим индекс редактируемого адреса
-                const locationIndex = updatedLocations.findIndex(loc => 
-                    loc.id === editingAddressId
-                );
-                
-                if (locationIndex !== -1) {
-                    updatedLocations[locationIndex] = addressData;
-                } else {
-                    updatedLocations.push(addressData);
-                }
+            if (locationIndex !== -1) {
+                updatedLocations[locationIndex] = addressData;
             } else {
                 updatedLocations.push(addressData);
             }
-            
-            // Create updated user object
-            const updatedUserData = {
-                ...userData,
-                locations: updatedLocations
-            };
+        } else {
+            updatedLocations.push(addressData);
+        }
+        
+        // Create updated user object
+        const updatedUserData = {
+            ...userData,
+            locations: updatedLocations
+        };
+        
+        console.log('Sending updated user data:', updatedUserData);
+        
+        try {
+            // Use the raw ID string directly in the URL without any processing
+            // This preserves the exact scientific notation format including the decimal point
+            const encodedId = encodeURIComponent(userId);
+            const updateUrl = `${API_BASE_URL}/users/${encodedId}`;
+            console.log('Update URL:', updateUrl);
             
             // Update user data in API
-            const updateResponse = await fetch(`${API_BASE_URL}/users/${userId}`, {
+            const updateResponse = await fetch(updateUrl, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -293,18 +524,56 @@ function AddAddressPage() {
             });
             
             if (!updateResponse.ok) {
+                const errorText = await updateResponse.text();
+                console.error(`Error updating response: ${updateResponse.status} - ${errorText}`);
                 throw new Error(`Error updating user data: ${updateResponse.status}`);
+            }
+            
+            const updatedUser = await updateResponse.json();
+            console.log('Address saved successfully!', updatedUser);
+            
+            // Check if the coordinates were saved correctly
+            if (updatedUser.locations && updatedUser.locations.length > 0) {
+                const savedLocation = isEditing 
+                    ? updatedUser.locations.find(loc => loc.id === editingAddressId)
+                    : updatedUser.locations[updatedUser.locations.length - 1];
+                
+                if (savedLocation) {
+                    console.log('Saved location coords in API response:', savedLocation.coords);
+                    console.log('Coordinates valid in response:', validateCoordinates(savedLocation.coords));
+                }
             }
             
             // Save the updated addresses to localStorage as well
             localStorage.setItem('savedAddresses', JSON.stringify(updatedLocations));
+            
+            // Update the user object in localStorage with the new locations
+            try {
+                const localUserString = localStorage.getItem('user');
+                if (localUserString) {
+                    const localUser = JSON.parse(localUserString);
+                    
+                    // Update locations with properly formatted coordinates
+                    localUser.locations = updatedLocations;
+                    
+                    // Make sure we keep using the scientific notation ID
+                    if (!localUser.id && userId) {
+                        localUser.id = userId;
+                    }
+                    
+                    localStorage.setItem('user', JSON.stringify(localUser));
+                    console.log('Updated user in localStorage with new locations');
+                }
+            } catch (error) {
+                console.error('Error updating user in localStorage:', error);
+            }
             
             // Navigate back to address page
             navigate('/dashboard/address');
             
         } catch (error) {
             console.error('Error saving address:', error);
-            alert('An error occurred while saving your address. Please try again.');
+            setError(`Failed to save address: ${error.message}`);
         } finally {
             setIsLoading(false);
         }
@@ -321,6 +590,13 @@ function AddAddressPage() {
                     <img className='w-[24px] h-[27px]' src={bell} alt="Notifications" />
                 </button>
             </div>
+            
+            {/* Debug Coordinates Display */}
+            {currentCoords && validateCoordinates(currentCoords) && (
+                <div className="text-xs text-green-600 mt-1 mb-1 text-center">
+                    Current coords: [{currentCoords[0].toFixed(4)}, {currentCoords[1].toFixed(4)}]
+                </div>
+            )}
             
             {/* Яндекс Карта */}
             <div 
@@ -360,6 +636,12 @@ function AddAddressPage() {
                 </div>
                 
                 <hr className='w-full text-[#E6E6E6] my-[20px]' />
+                
+                {error && (
+                    <div className="p-3 mb-4 text-red-700 bg-red-100 rounded-lg">
+                        {error}
+                    </div>
+                )}
                 
                 <p className='text-[16px] font-[500]'>Address Nickname</p>
                 <select 
