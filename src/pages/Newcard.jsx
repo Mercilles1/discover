@@ -289,7 +289,7 @@ const Newcard = () => {
       )}
 
       {showCongrats && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-0"></div>
+        <div className="fixed inset-0 bg-[#0000004f] bg-opacity-50 z-0"></div>
       )}
     </div>
   );
