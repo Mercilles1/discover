@@ -23,9 +23,7 @@ const Login = ({ login }) => {
 		const fetchUsers = async () => {
 			try {
 				const response = await fetch('https://marsgoup-1.onrender.com/api/users')
-				if (!response.ok) {
-					throw new Error('Failed to fetch users')
-				}
+				if (!response.ok) throw new Error('Failed to fetch users')
 				const data = await response.json()
 				setUsers(data)
 			} catch (err) {
@@ -102,111 +100,113 @@ const Login = ({ login }) => {
 	}
 
 	return (
-		<div className='max-w-[390px] md:max-w-[500px] w-full h-screen px-[24px] py-[12px] flex flex-col gap-[24px] mx-auto'>
-			<div className='flex flex-col gap-[8px] text-center md:text-left'>
-				<h1 className='font-[Montserrat] font-[700] text-[#1a1a1a] text-[28px] md:text-[32px] leading-[100%] tracking-[-0.05em]'>
-					Login to your account
-				</h1>
-				<p className='font-[Montserrat] font-[400] text-[16px] text-[#808080] leading-[140%] tracking-[0%]'>
-					It's great to see you again.
-				</p>
-			</div>
+		<div className="w-full min-h-screen px-4 py-12 flex justify-center items-center bg-[#f9f9f9]">
+			<div className="w-full max-w-[1100px] bg-white rounded-2xl shadow-2xl px-6 sm:px-10 md:px-16 xl:px-24 py-10 flex flex-col gap-6">
+				<div className="flex flex-col gap-2 text-center md:text-left">
+					<h1 className="font-[Montserrat] font-[700] text-[#1a1a1a] text-[28px] md:text-[32px] leading-[100%] tracking-[-0.05em]">
+						Login to your account
+					</h1>
+					<p className="font-[Montserrat] font-[400] text-[16px] text-[#808080] leading-[140%]">
+						It’s great to see you again.
+					</p>
+				</div>
 
-			<div className='flex flex-col justify-between h-full'>
-				<div className='flex flex-col gap-[10px]'>
-					<div className='flex flex-col gap-[16px]'>
-						<div className='flex flex-col gap-[4px]'>
-							<p className='font-[Montserrat] font-[500] text-[#1a1a1a] text-[16px]'>
+				<div className="flex flex-col justify-between h-full">
+					<div className="flex flex-col gap-4">
+						{/* Email input */}
+						<div className="flex flex-col gap-1">
+							<p className="font-[Montserrat] font-[500] text-[#1a1a1a] text-[16px]">
 								Email
 							</p>
 							<div
 								className={`flex items-center justify-between px-[22px] py-[17px] border rounded-[10px] ${borderEmail}`}
 							>
 								<input
-									className='outline-none w-full font-[Montserrat] font-[400] text-[16px] text-[#1A1A1A] placeholder:text-[#999999] tracking-[-0.04em]'
-									type='text'
-									placeholder='Enter your email address'
+									className="outline-none w-full font-[Montserrat] font-[400] text-[16px] text-[#1A1A1A] placeholder:text-[#999999] tracking-[-0.04em]"
+									type="text"
+									placeholder="Enter your email address"
 									value={emailInput}
 									onChange={handleEmailChange}
 									onBlur={SearchForEmail}
 								/>
-								{email && <img src={email} alt='Email status' className='w-[20px]' />}
+								{email && <img src={email} alt="Email status" className="w-[20px]" />}
 							</div>
 						</div>
 
-						<div className='flex flex-col gap-[4px]'>
-							<p className='font-[Montserrat] font-[500] text-[#1a1a1a] text-[16px]'>
+						{/* Password input */}
+						<div className="flex flex-col gap-1">
+							<p className="font-[Montserrat] font-[500] text-[#1a1a1a] text-[16px]">
 								Password
 							</p>
 							<div
 								className={`flex items-center justify-between px-[22px] py-[17px] border rounded-[10px] ${borderPassword}`}
 							>
 								<input
-									className='outline-none w-full font-[Montserrat] font-[400] text-[16px] text-[#1A1A1A] placeholder:text-[#999999] tracking-[-0.04em]'
+									className="outline-none w-full font-[Montserrat] font-[400] text-[16px] text-[#1A1A1A] placeholder:text-[#999999] tracking-[-0.04em]"
 									type={eye === password1 ? 'password' : 'text'}
-									placeholder='Enter your password'
+									placeholder="Enter your password"
 									value={passwordInput}
 									onChange={handlePasswordChange}
 								/>
-								<button onClick={toggleEye} className='ml-2'>
-									<img
-										className='w-[20px]'
-										src={eye}
-										alt='Toggle password visibility'
-									/>
+								<button onClick={toggleEye} className="ml-2">
+									<img className="w-[20px]" src={eye} alt="Toggle password visibility" />
 								</button>
 							</div>
 						</div>
 
-						{error && <p className='text-[#ED1010] text-sm'>{error}</p>}
-					</div>
+						{error && <p className="text-[#ED1010] text-sm">{error}</p>}
 
-					<div className='flex flex-col gap-[20px]'>
-						<p className='font-[Montserrat] font-[400] text-[#1a1a1a] text-[14px] flex flex-wrap items-center gap-[5px]'>
+						{/* Reset link */}
+						<p className="font-[Montserrat] font-[400] text-[#1a1a1a] text-[14px] flex flex-wrap items-center gap-[5px]">
 							Forgot your password?
-							<a href='#' className='underline text-[black] font-[500]'>
+							<a href="#" className="underline text-[black] font-[500]">
 								Reset your password
 							</a>
 						</p>
+
+						{/* Login button */}
 						<button
 							onClick={handleLogin}
-							className='w-full h-[54px] rounded-[10px] bg-[black] font-[Montserrat] font-[500] text-[white] text-[16px] flex items-center justify-center disabled:opacity-50'
+							className="w-full h-[54px] rounded-[10px] bg-[black] font-[Montserrat] font-[500] text-[white] text-[16px] flex items-center justify-center disabled:opacity-50"
 							disabled={disabled}
 						>
 							Login
 						</button>
 
-						<div className='flex items-center gap-[8px]'>
-							<hr className='text-[#E6E6E6] w-[45%]' />
-							<p className='font-[Montserrat] font-[400] text-[14px] text-[#808080]'>
+						{/* OR divider */}
+						<div className="flex items-center gap-[8px]">
+							<hr className="text-[#E6E6E6] w-[45%]" />
+							<p className="font-[Montserrat] font-[400] text-[14px] text-[#808080]">
 								Or
 							</p>
-							<hr className='text-[#E6E6E6] w-[45%]' />
+							<hr className="text-[#E6E6E6] w-[45%]" />
 						</div>
 
-						<div className='flex flex-col gap-[16px]'>
-							<button className='w-full border border-[#CCCCCC] rounded-[10px] h-[54px] flex items-center justify-center gap-[10px] font-[Montserrat] font-[500] text-[black] text-[16px]'>
-								<img src={google} alt='Google' />
+						{/* Social logins */}
+						<div className="flex flex-col gap-[16px]">
+							<button className="w-full border border-[#CCCCCC] rounded-[10px] h-[54px] flex items-center justify-center gap-[10px] font-[Montserrat] font-[500] text-[black] text-[16px]">
+								<img src={google} alt="Google" />
 								Login with Google
 							</button>
-							<button className='w-full bg-[#1877F2] h-[54px] rounded-[10px] flex items-center justify-center gap-[10px] font-[Montserrat] font-[500] text-[white] text-[16px]'>
-								<img src={facebook} alt='Facebook' />
+							<button className="w-full bg-[#1877F2] h-[54px] rounded-[10px] flex items-center justify-center gap-[10px] font-[Montserrat] font-[500] text-[white] text-[16px]">
+								<img src={facebook} alt="Facebook" />
 								Login with Facebook
 							</button>
 						</div>
 					</div>
-				</div>
 
-				<div className='flex items-center justify-center mt-[20px] text-center'>
-					<p className='font-[Montserrat] font-[400] text-[#1a1a1a] text-[16px] flex items-center gap-[5px] flex-wrap justify-center'>
-						Don’t have an account?
-						<NavLink to='/register' className='underline text-[black] font-[500]'>
-							Join
-						</NavLink>
-					</p>
+					{/* Footer */}
+					<div className="flex items-center justify-center mt-[20px] text-center">
+						<p className="font-[Montserrat] font-[400] text-[#1a1a1a] text-[16px] flex items-center gap-[5px] flex-wrap justify-center">
+							Don’t have an account?
+							<NavLink to="/register" className="underline text-[black] font-[500]">
+								Join
+							</NavLink>
+						</p>
+					</div>
 				</div>
-			</div>	
-		</div>	
+			</div>
+		</div>
 	)
 }
 

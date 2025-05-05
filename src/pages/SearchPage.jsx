@@ -36,9 +36,7 @@ function SearchPage() {
       setIsSearching(true);
       try {
         const response = await fetch('https://marsgoup-1.onrender.com/api/products');
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
+        if (!response.ok) throw new Error('Network response was not ok');
         const data = await response.json();
 
         const filteredProducts = data.filter(product =>
@@ -77,12 +75,12 @@ function SearchPage() {
   };
 
   return (
-    <div className='w-full max-w-[390px] mx-auto pt-5 px-4'>
+    <div className='w-full max-w-4xl mx-auto pt-5 px-4 md:px-8'>
       <div className='flex items-center justify-between'>
         <button onClick={goBack}>
           <img src={arrow} alt="Back" className='w-6 h-6 md:w-8 md:h-8' />
         </button>
-        <h1 className='text-lg md:text-xl font-semibold'>Search</h1>
+        <h1 className='text-lg md:text-2xl font-semibold'>Search</h1>
         <button className='mt-1'>
           <img className='w-6 h-6 md:w-7 md:h-7' src={bell} alt="Notifications" />
         </button>
@@ -105,10 +103,10 @@ function SearchPage() {
       {isSearching && searchResults.length > 0 && (
         <div className='mt-6'>
           <h2 className='text-lg font-semibold mb-3'>Results</h2>
-          <div className='max-h-[300px] overflow-y-auto space-y-3'>
+          <div className='max-h-[400px] overflow-y-auto space-y-3'>
             {searchResults.map(product => (
               <NavLink key={product._id} to={`/dashboard/products/${product.id}`} className='flex items-center p-3 border-b border-[#E6E6E6]'>
-                <div className='w-14 h-14 bg-gray-200 rounded-md flex-shrink-0 mr-4'>
+                <div className='w-16 h-16 bg-gray-200 rounded-md flex-shrink-0 mr-4'>
                   {product.img && <img src={product.img} alt={product.title} className='w-full h-full object-cover rounded-md' />}
                 </div>
                 <div className='flex-1'>

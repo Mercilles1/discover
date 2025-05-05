@@ -20,7 +20,6 @@ function AddressPage() {
 
     // Improved function to get current user ID from various storage locations
     const getCurrentUserId = () => {
-        // First try to get the user directly from localStorage
         const user = localStorage.getItem('user');
         if (user) {
             try {
@@ -33,7 +32,6 @@ function AddressPage() {
             }
         }
         
-        // Check all possible localStorage keys that might contain user information
         const possibleUserKeys = ['userData', 'user', 'currentUser', 'auth', 'authUser'];
         
         for (const key of possibleUserKeys) {
@@ -42,7 +40,6 @@ function AddressPage() {
                 try {
                     const parsedData = JSON.parse(storedData);
                     if (parsedData) {
-                        // Check different possible properties that might contain the ID
                         if (parsedData.id) return parsedData.id;
                         if (parsedData._id) return parsedData._id;
                         if (parsedData.userId) return parsedData.userId;
@@ -54,7 +51,6 @@ function AddressPage() {
             }
         }
         
-        // If still not found, use a hardcoded default ID
         console.log("User ID not found in localStorage, using default ID '2'");
         return "2";
     };
@@ -64,14 +60,12 @@ function AddressPage() {
         setIsLoading(true);
         setError(null);
         
-        // Get current user ID
         const currentUserId = getCurrentUserId();
         setUserId(currentUserId);
         
         console.log("Current user ID:", currentUserId);
         
         try {
-            // Fetch user data from API using the current user ID
             const response = await fetch(`${API_BASE_URL}/users/${currentUserId}`);
             
             if (!response.ok) {
@@ -81,9 +75,7 @@ function AddressPage() {
             const userData = await response.json();
             console.log("User data retrieved:", userData);
             
-            // Check if locations array exists and has items
             if (userData && userData.locations && Array.isArray(userData.locations)) {
-                // Filter locations to only include those belonging to the current user
                 const userLocations = userData.locations.filter(loc => 
                     !loc.userId || loc.userId === currentUserId
                 );
@@ -91,18 +83,15 @@ function AddressPage() {
                 setAddresses(userLocations);
                 console.log("Addresses loaded:", userLocations.length);
                 
-                // If there are addresses but none selected, select the first one
                 if (userLocations.length > 0 && !selectedAddress) {
                     setSelectedAddress(userLocations[0].id);
                 }
             } else {
                 console.log("No locations found in user data, checking localStorage");
-                // If no locations in API response, try to get from localStorage as fallback
                 const savedAddresses = localStorage.getItem('savedAddresses');
                 if (savedAddresses) {
                     try {
                         const parsedAddresses = JSON.parse(savedAddresses);
-                        // Filter addresses to only include those belonging to the current user
                         const userAddresses = parsedAddresses.filter(addr => 
                             !addr.userId || addr.userId === currentUserId
                         );
@@ -111,7 +100,6 @@ function AddressPage() {
                             console.log("Addresses loaded from localStorage:", userAddresses.length);
                             setAddresses(userAddresses);
                             
-                            // If there are addresses but none selected, select the first one
                             if (!selectedAddress) {
                                 setSelectedAddress(userAddresses[0].id);
                             }
@@ -125,12 +113,10 @@ function AddressPage() {
             console.error('Failed to fetch user addresses:', error);
             setError('Could not load your addresses. Please try again later.');
             
-            // Try to load from localStorage as fallback
             const savedAddresses = localStorage.getItem('savedAddresses');
             if (savedAddresses) {
                 try {
                     const parsedAddresses = JSON.parse(savedAddresses);
-                    // Filter addresses to only include those belonging to the current user
                     const userAddresses = parsedAddresses.filter(addr => 
                         !addr.userId || addr.userId === currentUserId
                     );
@@ -149,10 +135,8 @@ function AddressPage() {
     };
 
     useEffect(() => {
-        // Load addresses from API when component mounts
         fetchUserAddresses();
         
-        // Check for current selected address in localStorage
         const currentAddress = localStorage.getItem('currentAddress');
         if (currentAddress) {
             try {
@@ -176,7 +160,6 @@ function AddressPage() {
 
     const handleApply = () => {
         if (selectedAddress) {
-            // Save selected address as current
             const selectedAddressData = addresses.find(addr => addr.id === selectedAddress);
             if (selectedAddressData) {
                 localStorage.setItem('currentAddress', JSON.stringify(selectedAddressData));
@@ -186,13 +169,11 @@ function AddressPage() {
     };
 
     const handleEditAddress = (address) => {
-        // Save the address to edit in localStorage along with the current user ID
         const addressWithUserId = {
             ...address,
             userId: userId
         };
         localStorage.setItem('editingAddress', JSON.stringify(addressWithUserId));
-        // Navigate to the add address page
         navigate('/dashboard/addaddress');
     };
 
@@ -201,7 +182,7 @@ function AddressPage() {
     };
 
     return (
-        <div className='w-[390px] pt-[20px] px-[24px] relative'>
+        <div className='w-full max-w-[700px] mx-auto px-4 sm:px-6 lg:px-8 pt-5 relative'>
             <div className='flex items-center justify-between'>
                 <button onClick={goBack}>
                     <img src={arrow} alt="Back" />
@@ -226,7 +207,6 @@ function AddressPage() {
                 )}
             </div>
             
-            {/* Debug info - shows current user ID */}
             {userId && (
                 <div className="text-xs text-gray-500 mt-1 mb-2 text-center">
                     Account ID: {userId}
@@ -290,19 +270,22 @@ function AddressPage() {
             )}
             
             <NavLink to="/dashboard/addaddress" className="no-underline text-inherit">
-                <button className='flex justify-center items-center w-full h-[54px] rounded-[10px] border border-[#CCCCCC] mt-[24px] gap-[10px]'>
-                    <img src={plus} alt="Add" />
-                    <p>Add New Address</p>
+                <button className='flex justify-center items-center w-full h-[54px] rounded-[10px] border border-[#CCCCCC] mt-[12px]'>
+                    <img className='w-[18px] h-[18px]' src={plus} alt="Add Address" />
+                    <span className='text-[#808080] text-[16px] font-[600] ml-[10px]'>Add new address</span>
                 </button>
             </NavLink>
-
-            <button 
-                onClick={handleApply}
-                className={`flex justify-center items-center w-full h-[54px] rounded-[10px] mt-[16px] ${selectedAddress ? 'bg-[#1A1A1A]' : 'bg-[#CCCCCC]'}`}
-                disabled={!selectedAddress}
-            >
-                <p className='text-white'>Apply</p>
-            </button>
+            
+            {selectedAddress && (
+                <div className="mt-4">
+                    <button 
+                        onClick={handleApply}
+                        className="w-full py-3 bg-[#1A1A1A] text-white rounded-[10px]"
+                    >
+                        Apply Address
+                    </button>
+                </div>
+            )}
         </div>
     );
 }

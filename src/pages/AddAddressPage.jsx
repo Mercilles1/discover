@@ -311,7 +311,7 @@ function AddAddressPage() {
     };
 
     return (
-        <div className='w-[390px] relative h-screen overflow-hidden' ref={containerRef}>
+        <div className='w-full sm:w-[390px] md:w-[500px] lg:w-[600px] xl:w-[700px] mx-auto relative h-screen overflow-hidden' ref={containerRef}>
             <div className='flex items-center justify-between px-[24px] pt-[20px]'>
                 <button onClick={goBack}>
                     <img src={arrow} alt="Back" />
@@ -326,7 +326,7 @@ function AddAddressPage() {
             <div 
                 id="map" 
                 ref={mapRef}
-                className='w-[390px] transition-all duration-300'
+                className='w-full transition-all duration-300'
                 style={{ 
                     height: isFormExpanded ? '300px' : '500px',
                     backgroundColor: '#f0f0f0' 
@@ -384,26 +384,23 @@ function AddAddressPage() {
                         </option>
                     ))}
                 </select>
-                
-                <p className='text-[16px] font-[500] mt-[16px]'>Full Address</p>
+
+                <p className='text-[16px] font-[500] mt-[16px]'>Address</p>
                 <input 
+                    type="text"
                     className='w-full h-[52px] px-[20px] outline-none rounded-[10px] border border-[#E6E6E6] mt-[4px]'
-                    placeholder="Enter your full address..."
                     value={address}
                     onChange={handleAddressChange}
                     onBlur={handleAddressBlur}
+                    placeholder="Enter address"
                 />
                 
                 <button 
-                    className='w-full h-[54px] bg-black text-white rounded-[10px] mt-[20px] mb-[20px] flex justify-center items-center'
                     onClick={handleSaveAddress}
                     disabled={isLoading}
+                    className='w-full h-[52px] bg-[#FF6C00] rounded-[10px] text-white mt-[20px]'
                 >
-                    {isLoading ? (
-                        <span className="mr-2">Saving...</span>
-                    ) : (
-                        isEditing ? 'Update' : 'Add'
-                    )}
+                    {isLoading ? 'Saving...' : isEditing ? 'Save Changes' : 'Add Address'}
                 </button>
             </div>
         </div>
